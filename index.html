@@ -334,9 +334,14 @@
         <h2 class="title" style="font-size:16px;">النقاط</h2>
         <p class="sub" style="text-align:right;font-size:13.5px;line-height:2.1;margin:0;">
           • كل عضو يصوّت صح (يكتشف برا السالفة) → 100 نقطة<br>
-          • برا السالفة، عن كل عضو فشل يكتشفه → 100 نقطة<br>
-          • برا السالفة إذا خمّن الكلمة الصحيحة → 100 نقطة إضافية<br>
-          • إذا ما عرف الكلمة → صفر إضافي
+          • برا السالفة ما ياخذ أي نقاط إلا إذا خمّن الكلمة الصحيحة من التصنيف → 100 نقطة<br>
+          • إذا ما عرف الكلمة → صفر، حتى لو محد اكتشفه
+        </p>
+      </div>
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">إذا صار خطأ</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2;margin:0;">
+          إذا عضو شاف دور عضو ثاني بالغلط وقت التمرير، فيه زر "❌ إلغاء الجولة" بأي شاشة وقت الجولة — يرجعك للبداية بدون ما يمسح الأعضاء أو النقاط، وتقدر تبدأ جولة جديدة بأمان.
         </p>
       </div>
       <button class="btn btn-primary" onclick="showScreen('screen-home')">رجوع ←</button>
@@ -362,6 +367,7 @@
       <div class="progress-dots" id="revealDots"></div>
 
       <button class="btn btn-teal" id="revealNextBtn" style="max-width:220px;display:none;" onclick="nextReveal()">تم، التالي ←</button>
+      <button class="btn btn-danger" style="max-width:260px;" onclick="cancelRound()">❌ صار خطأ، ألغِ الجولة وابدأ من جديد</button>
     </div>
   </section>
 
@@ -399,6 +405,7 @@
       </div>
       <button class="btn btn-primary" style="max-width:280px;" onclick="nextDiscussTurn()" id="nextTurnBtn">الدور التالي ←</button>
       <button class="btn btn-danger" style="max-width:280px;" onclick="goToVote()">🗳️ الكل خلص أسئلة — للتصويت</button>
+      <button class="btn btn-ghost btn-sm" onclick="cancelRound()">❌ إلغاء الجولة</button>
     </div>
   </section>
 
@@ -412,6 +419,7 @@
     <p class="sub" style="margin-bottom:14px;">اختر بخصوصية مين تعتقد إنه "برا السالفة" ثم أكّد ومرّر الجهاز</p>
     <div class="vote-list" id="voteList"></div>
     <button class="btn btn-primary" style="margin-top:16px;" id="confirmVoteBtn" onclick="confirmVote()" disabled>تأكيد التصويت</button>
+    <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="cancelRound()">❌ إلغاء الجولة</button>
   </section>
 
   <!-- ============ RESULTS ============ -->
@@ -498,13 +506,14 @@ let state = {
   players: [],          // [{name, score}]
   selectedCats: [Object.keys(CATEGORIES)[0]],
   numImpostors: 1,
-  round: null            // {order, word, category, impostorIdx[], revealIdx, votes:{}, voteOrder, voteIdx}
+  round: null,           // {order, word, category, impostorIdx[], revealIdx, votes:{}, voteOrder, voteIdx}
+  lastImpostorIdx: []    // used to avoid repeating the same برا السالفة twice in a row
 };
 
 const STORAGE_KEY = 'barra_alsalfa_v1';
 
 function saveState(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({players: state.players, selectedCats: state.selectedCats, numImpostors: state.numImpostors}));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({players: state.players, selectedCats: state.selectedCats, numImpostors: state.numImpostors, lastImpostorIdx: state.lastImpostorIdx}));
 }
 function loadState(){
   try{
@@ -514,6 +523,7 @@ function loadState(){
       if(d.players) state.players = d.players;
       if(d.selectedCats) state.selectedCats = d.selectedCats;
       if(d.numImpostors) state.numImpostors = d.numImpostors;
+      if(d.lastImpostorIdx) state.lastImpostorIdx = d.lastImpostorIdx;
     }
   }catch(e){}
 }
@@ -632,8 +642,16 @@ function startRound(){
 
   // reveal order follows the order players were added (circular pass around the group as seated)
   const order = state.players.map((p,i)=>i);
-  // impostor(s) chosen independently at random, regardless of reveal order
-  const impostorIdx = shuffle(order).slice(0, state.numImpostors);
+  // impostor(s) chosen independently at random, regardless of reveal order.
+  // avoid repeating the exact same impostor(s) as last round when there are enough other players to choose from.
+  let pool = order;
+  if(state.lastImpostorIdx && state.lastImpostorIdx.length && order.length > state.numImpostors + state.lastImpostorIdx.length - 1){
+    const filtered = order.filter(i => !state.lastImpostorIdx.includes(i));
+    if(filtered.length >= state.numImpostors) pool = filtered;
+  }
+  const impostorIdx = shuffle(pool).slice(0, state.numImpostors);
+  state.lastImpostorIdx = impostorIdx;
+  saveState();
 
   state.round = {
     order,
@@ -656,6 +674,15 @@ function startRound(){
   renderRevealDots();
   setupRevealFor(order[0]);
 }
+
+function cancelRound(){
+  if(!confirm('تبي تلغي الجولة الحالية وترجع للبداية؟ الأعضاء والنقاط ما بتتأثر.')) return;
+  if(state.round && state.round.timerHandle) clearInterval(state.round.timerHandle);
+  state.round = null;
+  showToast('تم إلغاء الجولة');
+  backToSetup();
+}
+
 
 /* ===================== REVEAL PHASE ===================== */
 function renderRevealDots(){
@@ -865,7 +892,8 @@ function showResults(){
     tallyDiv.appendChild(line);
   });
 
-  // scoring
+  // scoring: voters who correctly identify برا السالفة earn points.
+  // برا السالفة earns points ONLY from correctly guessing the word — never from voters missing him.
   pendingScoreDelta = {};
   state.players.forEach(p=> pendingScoreDelta[p.name] = 0);
 
@@ -879,10 +907,6 @@ function showResults(){
       pendingScoreDelta[voterName] += 100;
       breakdown.push({name: voterName, delta: 1, reason:'اكتشف برا السالفة'});
     } else {
-      // impostor(s) gain a point for each wrong voter (split if multiple impostors)
-      r.impostorIdx.forEach(impIdx=>{
-        pendingScoreDelta[state.players[impIdx].name] += 100;
-      });
       breakdown.push({name: voterName, delta: 0, reason:'ما اكتشفه'});
     }
   });
@@ -894,17 +918,17 @@ function showResults(){
   const caught = caughtCount > totalVoters/2;
   const allCaught = totalVoters > 0 && caughtCount === totalVoters;
 
-  // برا السالفة يحصل دايمًا على فرصة يخمّن الكلمة، سواء انكشف أو لا
+  // برا السالفة يحصل دايمًا على فرصة يخمّن الكلمة — وهذي هي الطريقة الوحيدة اللي ياخذ فيها نقاط
   const guessCard = document.getElementById('guessCard');
   guessResolved = false;
   guessCard.style.display = 'block';
   let subMsg;
   if(allCaught){
-    subMsg = 'كل الأعضاء اكتشفوك! بس لسا عندك فرصة تخمّن الكلمة وتاخذ نقاط زي أي لاعب عادي لو جبتها صح.';
+    subMsg = 'كل الأعضاء اكتشفوك! النقطة الوحيدة الممكنة لك الحين هي تخمين الكلمة الصحيحة.';
   } else if(caught){
-    subMsg = 'تم اكتشافك من أغلب الأعضاء! خمّن الكلمة الصحيحة عشان تاخذ نقاط إضافية.';
+    subMsg = 'تم اكتشافك من أغلب الأعضاء! خمّن الكلمة الصحيحة عشان تاخذ نقاط.';
   } else {
-    subMsg = 'ما انكشفت! جرّب كمان تخمّن الكلمة الصحيحة عشان تضيف نقاط فوق اللي أخذتها.';
+    subMsg = 'ما انكشفت! بس تذكّر: ما تاخذ نقاط إلا لو خمّنت الكلمة الصحيحة الحين.';
   }
   document.getElementById('guessSub').textContent = r.impostorIdx.length>1
     ? 'كل "برا السالفة" له فرصة يخمّن الكلمة الصحيحة من التصنيف عشان يأخذ نقاط. ' + subMsg
