@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#150c28">
+<title>المافيا</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#150c28; --bg-1:#1f1240; --bg-2:#2b1a54; --panel:#241638;
+    --gold:#d4a94f; --gold-soft:#e8c876; --teal:#2e9e8c; --ink:#f4ecd8; --ink-dim:#c9bfe0;
+    --danger:#c1443a; --line:rgba(212,169,79,.25); --shadow:0 20px 50px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0; min-height:100vh; min-height:100dvh;
+    background: radial-gradient(1200px 600px at 50% -10%, var(--bg-2), transparent 60%),
+                radial-gradient(900px 500px at 100% 110%, #3a1f5c, transparent 60%), var(--bg-0);
+    color:var(--ink); font-family:'Tajawal',sans-serif;
+    display:flex; justify-content:center;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+    overflow-x:hidden;
+  }
+  .app{ width:100%; max-width:480px; min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; position:relative; padding:18px 18px calc(18px + env(safe-area-inset-bottom)); }
+  .bg-pattern{ position:fixed; inset:0; pointer-events:none; opacity:.08; z-index:0;
+    background-image: repeating-linear-gradient(45deg, var(--gold) 0 1px, transparent 1px 26px),
+                       repeating-linear-gradient(-45deg, var(--gold) 0 1px, transparent 1px 26px); }
+  .screen{ position:relative; z-index:1; display:none; flex-direction:column; flex:1; animation: fadeIn .35s ease; }
+  .screen.active{ display:flex; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+  header.top{ text-align:center; padding:10px 0 6px; }
+  .brand{ font-family:'Lalezar',cursive; font-size:32px; letter-spacing:1px; color:var(--gold-soft); text-shadow:0 2px 0 rgba(0,0,0,.35); margin:0; }
+  .brand small{ display:block; font-family:'Tajawal',sans-serif; font-size:12px; color:var(--ink-dim); font-weight:500; letter-spacing:3px; margin-top:2px; }
+  h2.title{ font-family:'Lalezar',cursive; font-size:22px; color:var(--gold-soft); margin:0 0 4px; text-align:right;}
+  p.sub{ color:var(--ink-dim); text-align:center; font-size:13.5px; margin:0 0 14px; line-height:1.7;}
+  .card{ background:linear-gradient(180deg, var(--panel), var(--bg-1)); border:1px solid var(--line); border-radius:18px; padding:16px; box-shadow:var(--shadow); }
+  .stack{ display:flex; flex-direction:column; gap:12px; }
+  .btn{ appearance:none; border:none; cursor:pointer; font-family:'Tajawal',sans-serif; font-weight:700; font-size:15.5px; padding:14px 16px; border-radius:14px; display:flex; align-items:center; justify-content:center; gap:8px; transition:transform .12s ease; width:100%; text-decoration:none; }
+  .btn:active{ transform:scale(.97); }
+  .btn-primary{ background:linear-gradient(180deg, var(--gold-soft), var(--gold)); color:#241203; box-shadow:0 8px 20px rgba(212,169,79,.25);}
+  .btn-ghost{ background:transparent; color:var(--ink); border:1px solid var(--line); }
+  .btn-teal{ background:linear-gradient(180deg,#3cb6a1,var(--teal)); color:#06231d; }
+  .btn-danger{ background:transparent; color:var(--danger); border:1px solid rgba(193,68,58,.4); }
+  .btn-sm{ padding:9px 12px; font-size:13px; border-radius:10px; width:auto;}
+  .btn:disabled{ opacity:.4; pointer-events:none; }
+  input[type=text]{ width:100%; background:var(--bg-0); border:1px solid var(--line); color:var(--ink); padding:13px 14px; border-radius:12px; font-family:'Tajawal',sans-serif; font-size:15px; outline:none; }
+  input[type=text]:focus{ border-color:var(--gold); }
+  .row{ display:flex; gap:8px; } .row > *{ flex:1; }
+  .player-chip{ display:flex; align-items:center; justify-content:space-between; background:var(--bg-0); border:1px solid var(--line); border-radius:12px; padding:11px 14px; font-weight:700; font-size:14.5px; }
+  .player-chip.dead{ opacity:.4; text-decoration:line-through; }
+  .chip-x{ color:var(--danger); background:none; border:none; font-size:18px; cursor:pointer; padding:0 4px;}
+  .stepper{ display:flex; align-items:center; justify-content:center; gap:18px; }
+  .stepper button{ width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:var(--bg-0); color:var(--gold-soft); font-size:18px; font-weight:900; cursor:pointer; }
+  .stepper .num{ font-family:'Lalezar',cursive; font-size:22px; color:var(--gold-soft); min-width:30px; text-align:center;}
+  .toggle-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; }
+  .toggle{ width:46px; height:26px; border-radius:20px; background:var(--bg-0); border:1px solid var(--line); position:relative; cursor:pointer; flex-shrink:0; }
+  .toggle .knob{ position:absolute; top:2px; right:2px; width:20px; height:20px; border-radius:50%; background:var(--ink-dim); transition:transform .15s ease, background .15s ease; }
+  .toggle.on{ border-color:var(--gold); }
+  .toggle.on .knob{ transform:translateX(-20px); background:var(--gold-soft); }
+  footer.hint{ text-align:center; color:var(--ink-dim); font-size:12px; margin-top:14px; line-height:1.8; }
+
+  .pass-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; }
+  .turn-label{ text-align:center; }
+  .turn-label .to{ color:var(--ink-dim); font-size:13px; letter-spacing:2px; }
+  .turn-label .name{ font-family:'Lalezar',cursive; font-size:30px; color:var(--gold-soft); margin-top:4px;}
+
+  .medallion{ width:210px; height:210px; cursor:pointer; }
+  .medallion-content{ width:100%; height:100%; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column; box-shadow:0 15px 40px rgba(0,0,0,.5); text-align:center; padding:14px; transition:transform .18s ease; background:radial-gradient(circle at 30% 25%, #3a2564, #1b0f33 70%); border:3px solid var(--gold); }
+  .medallion-content .seal{ width:60px; height:60px; border:2px solid var(--gold-soft); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:8px;}
+  .medallion-content .tap{ font-weight:700; color:var(--gold-soft); font-size:13px; letter-spacing:1px;}
+  .medallion-content.wolf{ background:radial-gradient(circle at 30% 25%, #5c2420, #2a0f0d 70%); border-color:var(--danger); }
+  .medallion-content.good{ background:radial-gradient(circle at 30% 25%, #17493f, #0c261f 70%); border-color:var(--teal); }
+  .medallion-content .role{ font-family:'Lalezar',cursive; font-size:22px; line-height:1.3;}
+  .medallion-content .role-note{ font-size:11.5px; color:var(--ink-dim); margin-top:6px; padding:0 6px; line-height:1.6;}
+  .progress-dots{ display:flex; gap:6px; } .progress-dots span{ width:7px; height:7px; border-radius:50%; background:var(--line); } .progress-dots span.done{ background:var(--gold); } .progress-dots span.cur{ background:var(--teal); }
+
+  .vote-list{ display:flex; flex-direction:column; gap:9px; }
+  .vote-opt{ background:var(--bg-0); border:1px solid var(--line); border-radius:12px; padding:13px 14px; font-weight:700; font-size:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
+  .vote-opt.sel{ border-color:var(--gold); background:rgba(212,169,79,.14); color:var(--gold-soft); }
+
+  .timer-circle{ width:130px; height:130px; border-radius:50%; border:6px solid var(--bg-0); display:flex; align-items:center; justify-content:center; flex-direction:column; }
+  .timer-circle .t{ font-family:'Lalezar',cursive; font-size:32px; color:var(--gold-soft); }
+  .timer-circle .l{ font-size:11px; color:var(--ink-dim); }
+
+  .result-line{ display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px dashed var(--line); font-size:14px;}
+  .result-line:last-child{ border-bottom:none; }
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--panel); border:1px solid var(--gold); color:var(--ink); padding:11px 20px; border-radius:30px; font-size:13.5px; font-weight:700; box-shadow:var(--shadow); z-index:50; opacity:0; pointer-events:none; transition:opacity .3s, bottom .3s; }
+  .toast.show{ opacity:1; bottom:34px; }
+</style>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="app" id="app">
+
+  <!-- ============ HOME / SETUP ============ -->
+  <section class="screen active" id="screen-home">
+    <header class="top"><h1 class="brand">المافيا<small>عصابة × مواطنين</small></h1></header>
+    <a class="btn btn-ghost btn-sm" href="./برا-السالفة.html" style="max-width:200px;margin:0 auto 8px;">← رجوع للألعاب</a>
+    <button class="btn btn-ghost btn-sm" style="max-width:160px;margin:0 auto 12px;" onclick="showScreen('screen-rules')">📜 قوانين اللعبة</button>
+
+    <div class="stack">
+      <div class="card">
+        <h2 class="title" style="font-size:17px;margin-bottom:10px;">الأعضاء</h2>
+        <div class="row" style="margin-bottom:10px;">
+          <input type="text" id="playerInput" placeholder="اكتب اسم العضو..." maxlength="16">
+          <button class="btn btn-primary btn-sm" style="flex:0 0 60px;" onclick="addPlayer()">➕</button>
+        </div>
+        <div class="stack" id="playerList" style="gap:8px;"></div>
+        <p class="sub" style="margin:10px 0 0;font-size:12px;" id="playerCountMsg"></p>
+      </div>
+
+      <div class="card">
+        <h2 class="title" style="font-size:17px;margin-bottom:6px;">عدد أعضاء المافيا 🕴️</h2>
+        <div class="stepper">
+          <button onclick="changeWolves(1)">+</button>
+          <div class="num" id="wolfNum">1</div>
+          <button onclick="changeWolves(-1)">−</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="title" style="font-size:17px;margin-bottom:6px;">أدوار إضافية</h2>
+        <div class="toggle-row">
+          <span style="font-weight:700;">🕵️ المحقق (يكشف هوية شخص كل ليلة)</span>
+          <div class="toggle" id="toggleSeer" onclick="toggleRole('seer')"><div class="knob"></div></div>
+        </div>
+        <div class="toggle-row">
+          <span style="font-weight:700;">💉 الطبيب (يحمي شخص كل ليلة)</span>
+          <div class="toggle" id="toggleDoctor" onclick="toggleRole('doctor')"><div class="knob"></div></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="startBtn" onclick="startGame()">🎬 ابدأ اللعبة</button>
+    </div>
+    <footer class="hint">بعد توزيع الأدوار، شخص واحد فقط (الراوي) يمسك الجهاز طول اللعبة ويقود الليل والنهار، والباقي يغمضون أعينهم وقت الليل ويفتحونها بس لما يطلب منهم</footer>
+  </section>
+
+  <!-- ============ REVEAL (pass device) ============ -->
+  <section class="screen" id="screen-reveal">
+    <header class="top"><h1 class="brand" style="font-size:22px;">كشف الأدوار</h1></header>
+    <div class="pass-wrap">
+      <div class="turn-label"><div class="to">مرّر الجهاز إلى</div><div class="name" id="revealName">—</div></div>
+      <div class="medallion" id="medallion" onclick="flipMedallion()">
+        <div class="medallion-content" id="medallionContent"><div class="seal">🕴️</div><div class="tap">اضغط للكشف بخصوصية</div></div>
+      </div>
+      <div class="progress-dots" id="revealDots"></div>
+      <button class="btn btn-teal" id="revealNextBtn" style="max-width:220px;display:none;" onclick="nextReveal()">تم، التالي ←</button>
+    </div>
+  </section>
+
+  <!-- ============ NARRATOR NOTICE ============ -->
+  <section class="screen" id="screen-narrator">
+    <header class="top"><h1 class="brand" style="font-size:22px;">قبل ما نبدأ الليل 🌙</h1></header>
+    <div class="card" style="text-align:center;">
+      <p class="sub" style="font-size:15px;line-height:2;">من الحين، شخص واحد بس (الراوي) يمسك الجهاز طول اللعبة.<br>باقي الأعضاء يغمضون أعينهم وقت الليل، ويفتحونها بس لما الراوي يقول.</p>
+    </div>
+    <button class="btn btn-primary" style="margin-top:16px;" onclick="startNight()">🌙 ابدأ الليلة الأولى</button>
+  </section>
+
+  <!-- ============ NIGHT INTRO ============ -->
+  <section class="screen" id="screen-night-intro">
+    <div class="pass-wrap">
+      <div class="turn-label"><div class="to">🌙 ليلة رقم</div><div class="name" id="nightNum">1</div></div>
+      <p class="sub" style="max-width:280px;">الكل يغمض عينه بهدوء...</p>
+      <button class="btn btn-primary" style="max-width:260px;" onclick="goNightStep()">متابعة ←</button>
+    </div>
+  </section>
+
+  <!-- ============ NIGHT: WOLVES ============ -->
+  <section class="screen" id="screen-night-wolves">
+    <header class="top"><h1 class="brand" style="font-size:22px;">🕴️ دور المافيا</h1></header>
+    <p class="sub">أعضاء المافيا يفتحون أعينهم بهدوء ويشيرون لضحيتهم الليلة. الراوي يختار الاسم:</p>
+    <div class="vote-list" id="wolfTargetList"></div>
+    <button class="btn btn-primary" style="margin-top:16px;" id="wolfConfirmBtn" onclick="confirmWolfTarget()" disabled>تأكيد ← المافيا يغمضون</button>
+  </section>
+
+  <!-- ============ NIGHT: SEER ============ -->
+  <section class="screen" id="screen-night-seer">
+    <header class="top"><h1 class="brand" style="font-size:22px;">🕵️ دور المحقق</h1></header>
+    <p class="sub" id="seerPrompt">المحقق يفتح عينه ويختار شخص يبي يتأكد من هويته:</p>
+    <div class="vote-list" id="seerTargetList"></div>
+    <div class="card" id="seerResultCard" style="display:none;text-align:center;margin-top:14px;">
+      <p class="sub" style="margin:0 0 6px;">النتيجة (وريها للعرّاف بخصوصية)</p>
+      <div style="font-family:'Lalezar',cursive;font-size:24px;color:var(--gold-soft);" id="seerResultText">—</div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:16px;" id="seerConfirmBtn" onclick="confirmSeerTarget()" disabled>كشف الهوية</button>
+    <button class="btn btn-teal" style="margin-top:10px;display:none;" id="seerNextBtn" onclick="afterSeer()">تم، المحقق يغمض ←</button>
+  </section>
+
+  <!-- ============ NIGHT: DOCTOR ============ -->
+  <section class="screen" id="screen-night-doctor">
+    <header class="top"><h1 class="brand" style="font-size:22px;">💉 دور الطبيب</h1></header>
+    <p class="sub">الطبيب يفتح عينه ويختار شخص يبي يحميه الليلة:</p>
+    <div class="vote-list" id="doctorTargetList"></div>
+    <button class="btn btn-primary" style="margin-top:16px;" id="doctorConfirmBtn" onclick="confirmDoctorTarget()" disabled>تأكيد ← الطبيب يغمض</button>
+  </section>
+
+  <!-- ============ DAY DAWN (night result) ============ -->
+  <section class="screen" id="screen-day-dawn">
+    <header class="top"><h1 class="brand" style="font-size:22px;">☀️ الصبح طلع</h1></header>
+    <div class="card" style="text-align:center;">
+      <p class="sub" style="margin-bottom:6px;">الكل يفتح عينه...</p>
+      <div id="dawnResult" style="font-family:'Lalezar',cursive;font-size:22px;color:var(--gold-soft);line-height:1.5;"></div>
+    </div>
+    <button class="btn btn-primary" style="margin-top:16px;" onclick="goToDiscuss()">🗣️ نقاش النهار</button>
+  </section>
+
+  <!-- ============ DAY DISCUSSION ============ -->
+  <section class="screen" id="screen-day-discuss">
+    <header class="top"><h1 class="brand" style="font-size:22px;">🗣️ نقاش النهار</h1></header>
+    <p class="sub">ناقشوا مين تشكون فيه، بعدها صوّتوا على مين يُطرد من المدينة</p>
+    <div class="pass-wrap" style="gap:20px;">
+      <div class="timer-circle"><div class="t" id="discussTimerText">2:00</div><div class="l">دقيقة</div></div>
+      <div class="row" style="max-width:280px;">
+        <button class="btn btn-ghost btn-sm" onclick="toggleDiscussTimer()" id="discussTimerBtn">▶ بدء</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetDiscussTimer()">↺ إعادة</button>
+      </div>
+      <button class="btn btn-danger" style="max-width:280px;" onclick="goToVote()">🗳️ للتصويت</button>
+    </div>
+  </section>
+
+  <!-- ============ DAY VOTE ============ -->
+  <section class="screen" id="screen-day-vote">
+    <header class="top"><h1 class="brand" style="font-size:22px;">🗳️ التصويت</h1></header>
+    <div class="turn-label" style="margin-bottom:14px;"><div class="to">صوّت الآن يا</div><div class="name" id="voteName">—</div></div>
+    <p class="sub">اختر بخصوصية مين تبي تطرده من المدينة</p>
+    <div class="vote-list" id="dayVoteList"></div>
+    <button class="btn btn-primary" style="margin-top:16px;" id="confirmDayVoteBtn" onclick="confirmDayVote()" disabled>تأكيد التصويت</button>
+  </section>
+
+  <!-- ============ DAY RESULT ============ -->
+  <section class="screen" id="screen-day-result">
+    <header class="top"><h1 class="brand" style="font-size:22px;">📢 نتيجة الطرد</h1></header>
+    <div class="card" style="text-align:center;">
+      <div id="dayResultText" style="font-family:'Lalezar',cursive;font-size:22px;color:var(--gold-soft);line-height:1.6;"></div>
+    </div>
+    <div class="card" style="margin-top:14px;"><div id="dayVoteTally"></div></div>
+    <button class="btn btn-primary" style="margin-top:16px;" onclick="afterDayResult()">متابعة ←</button>
+  </section>
+
+  <!-- ============ WINNER ============ -->
+  <section class="screen" id="screen-winner">
+    <header class="top"><h1 class="brand" style="font-size:22px;">🏆 انتهت اللعبة</h1></header>
+    <div class="card" style="text-align:center;margin-bottom:14px;">
+      <div style="font-family:'Lalezar',cursive;font-size:26px;color:var(--gold-soft);" id="winnerText">—</div>
+    </div>
+    <div class="card"><h2 class="title" style="font-size:16px;">الأدوار الكاملة</h2><div id="allRolesList"></div></div>
+    <div class="stack" style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="startGame()">🔁 لعبة جديدة (نفس الأعضاء)</button>
+      <button class="btn btn-ghost" onclick="backToSetup()">⚙️ تعديل الأعضاء</button>
+    </div>
+  </section>
+
+  <!-- ============ RULES ============ -->
+  <section class="screen" id="screen-rules">
+    <header class="top"><h1 class="brand" style="font-size:22px;">📜 قوانين اللعبة</h1></header>
+    <div class="stack">
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">الفكرة</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2;margin:0;">
+          مجموعة مقسومة سرًا بين "مواطنين" و"عصابة مافيا" مختبئة بينهم. بالليل المافيا تصفّي ضحية، وبالنهار الكل يناقش ويصوّت على طرد شخص يشكون إنه من المافيا. المواطنون يفوزون إذا قضوا على كل المافيا، والمافيا تفوز إذا صار عددها يعادل أو يفوق باقي المدينة.
+        </p>
+      </div>
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">الأدوار</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2.1;margin:0;">
+          🕴️ <b>عضو المافيا</b>: يعرف باقي أعضاء العصابة، ويختارون ضحية كل ليلة<br>
+          🧑 <b>المواطن</b>: ما عنده قدرات، بس صوته بالنقاش والتصويت<br>
+          🕵️ <b>المحقق</b> (اختياري): يكشف هوية شخص وحد كل ليلة<br>
+          💉 <b>الطبيب</b> (اختياري): يحمي شخص وحد من هجوم الذئاب كل ليلة
+        </p>
+      </div>
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">مهم: دور الراوي</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2;margin:0;">
+          بعد كشف الأدوار، شخص واحد فقط (الراوي) يمسك الجهاز طول اللعبة ويقود الليل والنهار، والباقي يغمضون أعينهم وقت الليل ويفتحونها بس لما يطلب منهم — عشان محد يعرف هوية غيره من تمرير الجهاز.
+        </p>
+      </div>
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">خطوات اللعب</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2.1;margin:0;">
+          1. كشف الأدوار بخصوصية (يتمرر الجهاز)<br>
+          2. الليل: المافيا يختارون ضحية ← المحقق يكشف شخص ← الطبيب يحمي شخص<br>
+          3. الصبح: يُعلن مين مات (أو نجا)<br>
+          4. نقاش بمؤقت، ثم تصويت سري على طرد شخص<br>
+          5. تتكرر الدورة لين يفوز أحد الطرفين
+        </p>
+      </div>
+      <button class="btn btn-primary" onclick="showScreen('screen-home')">رجوع ←</button>
+    </div>
+  </section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== STATE ===================== */
+let state = { players: [], numWolves: 1, includeSeer: false, includeDoctor: false };
+const STORAGE_KEY = 'mafia_game_v1';
+let game = null;
+
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify({players: state.players.map(p=>p.name), numWolves: state.numWolves, includeSeer: state.includeSeer, includeDoctor: state.includeDoctor})); }
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const d = JSON.parse(raw);
+      if(d.players) state.players = d.players.map(n=>({name:n}));
+      if(d.numWolves) state.numWolves = d.numWolves;
+      state.includeSeer = !!d.includeSeer;
+      state.includeDoctor = !!d.includeDoctor;
+    }
+  }catch(e){}
+}
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1700); }
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ===================== SETUP ===================== */
+function renderPlayers(){
+  const list = document.getElementById('playerList'); list.innerHTML = '';
+  state.players.forEach((p,i)=>{
+    const div = document.createElement('div'); div.className='player-chip';
+    div.innerHTML = `<span>${p.name}</span><button class="chip-x" onclick="removePlayer(${i})">✕</button>`;
+    list.appendChild(div);
+  });
+  const msg = document.getElementById('playerCountMsg');
+  msg.textContent = state.players.length < 5 ? `أضف ${5-state.players.length} أعضاء على الأقل (الحد الأدنى 5)` : `عدد الأعضاء: ${state.players.length}`;
+  document.getElementById('startBtn').disabled = state.players.length < 5;
+  document.getElementById('toggleSeer').classList.toggle('on', state.includeSeer);
+  document.getElementById('toggleDoctor').classList.toggle('on', state.includeDoctor);
+  document.getElementById('wolfNum').textContent = state.numWolves;
+}
+function addPlayer(){
+  const input = document.getElementById('playerInput');
+  const name = input.value.trim();
+  if(!name) return;
+  if(state.players.some(p=>p.name===name)){ showToast('الاسم موجود مسبقًا'); return; }
+  state.players.push({name});
+  input.value=''; saveState(); renderPlayers();
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('playerInput').addEventListener('keydown', e=>{ if(e.key==='Enter') addPlayer(); });
+});
+function removePlayer(i){ state.players.splice(i,1); saveState(); renderPlayers(); }
+function changeWolves(delta){
+  const max = Math.max(1, Math.floor(state.players.length/3));
+  state.numWolves = Math.min(max, Math.max(1, state.numWolves + delta));
+  saveState(); renderPlayers();
+}
+function toggleRole(role){
+  if(role==='seer') state.includeSeer = !state.includeSeer;
+  if(role==='doctor') state.includeDoctor = !state.includeDoctor;
+  saveState(); renderPlayers();
+}
+function backToSetup(){ renderPlayers(); showScreen('screen-home'); }
+
+/* ===================== START GAME / ROLE ASSIGNMENT ===================== */
+function startGame(){
+  if(state.players.length < 5){ showToast('أضف 5 أعضاء على الأقل'); return; }
+  const idxs = shuffle(state.players.map((p,i)=>i));
+  const roles = state.players.map(()=>'villager');
+  let pos = 0;
+  for(let i=0;i<state.numWolves;i++){ roles[idxs[pos++]] = 'wolf'; }
+  if(state.includeSeer) roles[idxs[pos++]] = 'seer';
+  if(state.includeDoctor) roles[idxs[pos++]] = 'doctor';
+
+  state.players.forEach((p,i)=>{ p.role = roles[i]; p.alive = true; });
+
+  game = {
+    order: state.players.map((p,i)=>i), // reveal order = join order
+    revealPos: 0,
+    nightNum: 1,
+    wolfTarget: null,
+    doctorTarget: null,
+    seerTarget: null,
+    seerResultShown: false,
+    discussTimerSeconds: 120,
+    discussTimerRunning: false,
+    discussTimerHandle: null,
+    voteOrder: [],
+    votePos: 0,
+    dayVotes: {},
+    currentVoteSelection: null
+  };
+  showScreen('screen-reveal');
+  renderRevealDots();
+  setupRevealFor(game.order[0]);
+}
+
+/* ===================== REVEAL ===================== */
+function renderRevealDots(){
+  const wrap = document.getElementById('revealDots'); wrap.innerHTML='';
+  game.order.forEach((_,i)=>{ const dot=document.createElement('span'); dot.className = i<game.revealPos?'done':(i===game.revealPos?'cur':''); wrap.appendChild(dot); });
+}
+let medallionRevealed = false;
+function setupRevealFor(playerIdx){
+  document.getElementById('revealName').textContent = state.players[playerIdx].name;
+  document.getElementById('revealNextBtn').style.display = 'none';
+  medallionRevealed = false;
+  const content = document.getElementById('medallionContent');
+  content.style.transform = 'scaleX(1)';
+  content.className = 'medallion-content';
+  content.innerHTML = `<div class="seal">🕴️</div><div class="tap">اضغط للكشف بخصوصية</div>`;
+}
+function roleLabel(role){
+  return role==='wolf' ? '🕴️ مافيا' : role==='seer' ? '🕵️ محقق' : role==='doctor' ? '💉 طبيب' : '🧑 مواطن';
+}
+function flipMedallion(){
+  if(medallionRevealed) return;
+  medallionRevealed = true;
+  const content = document.getElementById('medallionContent');
+  const playerIdx = game.order[game.revealPos];
+  const p = state.players[playerIdx];
+  content.style.transform = 'scaleX(0)';
+  setTimeout(()=>{
+    if(p.role === 'wolf'){
+      content.className = 'medallion-content wolf';
+      const others = state.players.filter((pl,i)=> pl.role==='wolf' && i!==playerIdx).map(pl=>pl.name);
+      const teammates = others.length ? `زملاؤك بالعصابة: ${others.join('، ')}` : 'أنت عضو المافيا الوحيد!';
+      content.innerHTML = `<div class="role">🕴️ أنت من المافيا!</div><div class="role-note">${teammates}</div>`;
+    } else if(p.role === 'seer'){
+      content.className = 'medallion-content good';
+      content.innerHTML = `<div class="role">🕵️ أنت المحقق</div><div class="role-note">كل ليلة تقدر تكشف هوية شخص وحد — هل هو من المافيا أو لا</div>`;
+    } else if(p.role === 'doctor'){
+      content.className = 'medallion-content good';
+      content.innerHTML = `<div class="role">💉 أنت الطبيب</div><div class="role-note">كل ليلة تقدر تحمي شخص وحد من هجوم الذئاب</div>`;
+    } else {
+      content.className = 'medallion-content good';
+      content.innerHTML = `<div class="role">🧑 أنت مواطن</div><div class="role-note">حاول تكتشف أعضاء المافيا بالنقاش والتصويت!</div>`;
+    }
+    content.style.transform = 'scaleX(1)';
+    document.getElementById('revealNextBtn').style.display = 'block';
+  }, 180);
+}
+function nextReveal(){
+  game.revealPos++;
+  renderRevealDots();
+  if(game.revealPos >= game.order.length){ showScreen('screen-narrator'); }
+  else { setupRevealFor(game.order[game.revealPos]); }
+}
+
+/* ===================== NIGHT PHASE ===================== */
+function alivePlayers(){ return state.players.map((p,i)=>({...p, idx:i})).filter(p=>p.alive); }
+function aliveWolves(){ return alivePlayers().filter(p=>p.role==='wolf'); }
+function aliveNonWolves(){ return alivePlayers().filter(p=>p.role!=='wolf'); }
+
+function startNight(){
+  showScreen('screen-night-intro');
+  document.getElementById('nightNum').textContent = game.nightNum;
+  game.wolfTarget = null; game.doctorTarget = null; game.seerTarget = null; game.seerResultShown = false;
+}
+function goNightStep(){
+  if(aliveWolves().length > 0){ setupWolfStep(); showScreen('screen-night-wolves'); return; }
+  goAfterWolves();
+}
+function setupWolfStep(){
+  document.getElementById('wolfConfirmBtn').disabled = true;
+  const list = document.getElementById('wolfTargetList'); list.innerHTML='';
+  aliveNonWolves().forEach(p=>{
+    const div = document.createElement('div'); div.className='vote-opt';
+    div.innerHTML = `<span>${p.name}</span><span>🎯</span>`;
+    div.onclick = ()=>{ game.wolfTarget = p.idx; document.querySelectorAll('#wolfTargetList .vote-opt').forEach(el=>el.classList.remove('sel')); div.classList.add('sel'); document.getElementById('wolfConfirmBtn').disabled=false; };
+    list.appendChild(div);
+  });
+}
+function confirmWolfTarget(){ goAfterWolves(); }
+function goAfterWolves(){
+  if(state.includeSeer && state.players.some(p=>p.role==='seer' && p.alive)){ setupSeerStep(); showScreen('screen-night-seer'); return; }
+  goAfterSeer();
+}
+function setupSeerStep(){
+  document.getElementById('seerResultCard').style.display='none';
+  document.getElementById('seerConfirmBtn').style.display='flex';
+  document.getElementById('seerConfirmBtn').disabled = true;
+  document.getElementById('seerNextBtn').style.display='none';
+  const seerIdx = state.players.findIndex(p=>p.role==='seer' && p.alive);
+  const list = document.getElementById('seerTargetList'); list.innerHTML='';
+  alivePlayers().filter(p=>p.idx!==seerIdx).forEach(p=>{
+    const div = document.createElement('div'); div.className='vote-opt';
+    div.innerHTML = `<span>${p.name}</span><span>🔍</span>`;
+    div.onclick = ()=>{ game.seerTarget = p.idx; document.querySelectorAll('#seerTargetList .vote-opt').forEach(el=>el.classList.remove('sel')); div.classList.add('sel'); document.getElementById('seerConfirmBtn').disabled=false; };
+    list.appendChild(div);
+  });
+}
+function confirmSeerTarget(){
+  const target = state.players[game.seerTarget];
+  document.getElementById('seerResultText').textContent = target.role==='wolf' ? `${target.name} من المافيا 🕴️` : `${target.name} مو من المافيا ✅`;
+  document.getElementById('seerResultCard').style.display='block';
+  document.getElementById('seerConfirmBtn').style.display='none';
+  document.getElementById('seerNextBtn').style.display='flex';
+}
+function afterSeer(){ goAfterSeer(); }
+function goAfterSeer(){
+  if(state.includeDoctor && state.players.some(p=>p.role==='doctor' && p.alive)){ setupDoctorStep(); showScreen('screen-night-doctor'); return; }
+  resolveNight();
+}
+function setupDoctorStep(){
+  document.getElementById('doctorConfirmBtn').disabled = true;
+  const list = document.getElementById('doctorTargetList'); list.innerHTML='';
+  alivePlayers().forEach(p=>{
+    const div = document.createElement('div'); div.className='vote-opt';
+    div.innerHTML = `<span>${p.name}</span><span>🛡️</span>`;
+    div.onclick = ()=>{ game.doctorTarget = p.idx; document.querySelectorAll('#doctorTargetList .vote-opt').forEach(el=>el.classList.remove('sel')); div.classList.add('sel'); document.getElementById('doctorConfirmBtn').disabled=false; };
+    list.appendChild(div);
+  });
+}
+function confirmDoctorTarget(){ resolveNight(); }
+
+function resolveNight(){
+  showScreen('screen-day-dawn');
+  const dawn = document.getElementById('dawnResult');
+  if(game.wolfTarget !== null && game.wolfTarget === game.doctorTarget){
+    dawn.textContent = 'الطبيب نجح ينقذ الضحية الليلة! محد مات 🎉';
+  } else if(game.wolfTarget !== null){
+    state.players[game.wolfTarget].alive = false;
+    dawn.textContent = `توفي الليلة: ${state.players[game.wolfTarget].name} (كان ${roleLabel(state.players[game.wolfTarget].role)})`;
+  } else {
+    dawn.textContent = 'ما صار شي الليلة.';
+  }
+  saveState();
+}
+function goToDiscuss(){
+  const win = checkWin();
+  if(win){ showWinner(win); return; }
+  showScreen('screen-day-discuss');
+  resetDiscussTimer();
+}
+
+/* ===================== DAY DISCUSSION TIMER ===================== */
+function toggleDiscussTimer(){
+  const btn = document.getElementById('discussTimerBtn');
+  if(game.discussTimerRunning){
+    clearInterval(game.discussTimerHandle); game.discussTimerRunning=false; btn.textContent='▶ بدء';
+  } else {
+    game.discussTimerRunning = true; btn.textContent='⏸ إيقاف';
+    game.discussTimerHandle = setInterval(()=>{
+      game.discussTimerSeconds--;
+      if(game.discussTimerSeconds<=0){ game.discussTimerSeconds=0; clearInterval(game.discussTimerHandle); game.discussTimerRunning=false; btn.textContent='▶ بدء'; showToast('انتهى وقت النقاش!'); }
+      updateDiscussTimerText();
+    },1000);
+  }
+}
+function resetDiscussTimer(){
+  clearInterval(game.discussTimerHandle); game.discussTimerRunning=false; game.discussTimerSeconds=120;
+  document.getElementById('discussTimerBtn').textContent='▶ بدء'; updateDiscussTimerText();
+}
+function updateDiscussTimerText(){
+  const s = game.discussTimerSeconds; const m = Math.floor(s/60); const r = s%60;
+  document.getElementById('discussTimerText').textContent = `${m}:${r<10?'0':''}${r}`;
+}
+
+/* ===================== DAY VOTE ===================== */
+function goToVote(){
+  clearInterval(game.discussTimerHandle);
+  game.voteOrder = shuffle(alivePlayers().map(p=>p.idx));
+  game.votePos = 0;
+  game.dayVotes = {};
+  showScreen('screen-day-vote');
+  setupDayVoteTurn();
+}
+function setupDayVoteTurn(){
+  const voterIdx = game.voteOrder[game.votePos];
+  document.getElementById('voteName').textContent = state.players[voterIdx].name;
+  game.currentVoteSelection = null;
+  document.getElementById('confirmDayVoteBtn').disabled = true;
+  const list = document.getElementById('dayVoteList'); list.innerHTML='';
+  alivePlayers().forEach(p=>{
+    if(p.idx===voterIdx) return;
+    const div = document.createElement('div'); div.className='vote-opt';
+    div.innerHTML = `<span>${p.name}</span><span>🕴️</span>`;
+    div.onclick = ()=>{ game.currentVoteSelection = p.idx; document.querySelectorAll('#dayVoteList .vote-opt').forEach(el=>el.classList.remove('sel')); div.classList.add('sel'); document.getElementById('confirmDayVoteBtn').disabled=false; };
+    list.appendChild(div);
+  });
+}
+function confirmDayVote(){
+  const voterIdx = game.voteOrder[game.votePos];
+  game.dayVotes[voterIdx] = game.currentVoteSelection;
+  game.votePos++;
+  if(game.votePos >= game.voteOrder.length){ showDayResult(); } else { setupDayVoteTurn(); }
+}
+function showDayResult(){
+  const tally = {};
+  alivePlayers().forEach(p=> tally[p.idx]=0);
+  Object.values(game.dayVotes).forEach(v=>{ if(v!==null && v!==undefined) tally[v]++; });
+  const tallyDiv = document.getElementById('dayVoteTally'); tallyDiv.innerHTML='';
+  let maxVotes = -1, maxIdx = null, tie = false;
+  Object.keys(tally).forEach(idxStr=>{
+    const idx = parseInt(idxStr);
+    const line = document.createElement('div'); line.className='result-line';
+    line.innerHTML = `<span>${state.players[idx].name}</span><span>${tally[idx]} صوت</span>`;
+    tallyDiv.appendChild(line);
+    if(tally[idx] > maxVotes){ maxVotes = tally[idx]; maxIdx = idx; tie = false; }
+    else if(tally[idx] === maxVotes){ tie = true; }
+  });
+  const resText = document.getElementById('dayResultText');
+  if(tie || maxVotes===0){
+    resText.textContent = 'تعادل بالأصوات! محد اتطرد اليوم 🤝';
+  } else {
+    state.players[maxIdx].alive = false;
+    resText.textContent = `تم طرد ${state.players[maxIdx].name} من المدينة! كان ${roleLabel(state.players[maxIdx].role)}`;
+  }
+  saveState();
+  showScreen('screen-day-result');
+}
+function afterDayResult(){
+  const win = checkWin();
+  if(win){ showWinner(win); return; }
+  game.nightNum++;
+  startNight();
+}
+
+/* ===================== WIN CHECK ===================== */
+function checkWin(){
+  const wolves = state.players.filter(p=>p.alive && p.role==='wolf').length;
+  const others = state.players.filter(p=>p.alive && p.role!=='wolf').length;
+  if(wolves === 0) return 'villagers';
+  if(wolves >= others) return 'wolves';
+  return null;
+}
+function showWinner(who){
+  document.getElementById('winnerText').textContent = who==='villagers' ? '🎉 فاز المواطنون! تم القضاء على كل أعضاء المافيا' : '🕴️ فازت المافيا! سيطرت على المدينة';
+  const list = document.getElementById('allRolesList'); list.innerHTML='';
+  state.players.forEach(p=>{
+    const line = document.createElement('div'); line.className='result-line';
+    line.innerHTML = `<span>${p.name} ${p.alive?'':'💀'}</span><span>${roleLabel(p.role)}</span>`;
+    list.appendChild(line);
+  });
+  showScreen('screen-winner');
+}
+
+/* ===================== INIT ===================== */
+loadState();
+renderPlayers();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>

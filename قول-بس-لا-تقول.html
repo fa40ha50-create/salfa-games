@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#150c28">
+<title>قول بس لا تقول</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#150c28; --bg-1:#1f1240; --bg-2:#2b1a54; --panel:#241638;
+    --gold:#d4a94f; --gold-soft:#e8c876; --teal:#2e9e8c; --ink:#f4ecd8; --ink-dim:#c9bfe0;
+    --danger:#c1443a; --line:rgba(212,169,79,.25); --shadow:0 20px 50px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0; min-height:100vh; min-height:100dvh;
+    background: radial-gradient(1200px 600px at 50% -10%, var(--bg-2), transparent 60%),
+                radial-gradient(900px 500px at 100% 110%, #3a1f5c, transparent 60%), var(--bg-0);
+    color:var(--ink); font-family:'Tajawal',sans-serif;
+    display:flex; justify-content:center;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+    overflow-x:hidden;
+  }
+  .app{ width:100%; max-width:480px; min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; position:relative; padding:18px 18px calc(18px + env(safe-area-inset-bottom)); }
+  .bg-pattern{ position:fixed; inset:0; pointer-events:none; opacity:.08; z-index:0;
+    background-image: repeating-linear-gradient(45deg, var(--gold) 0 1px, transparent 1px 26px),
+                       repeating-linear-gradient(-45deg, var(--gold) 0 1px, transparent 1px 26px); }
+  .screen{ position:relative; z-index:1; display:none; flex-direction:column; flex:1; animation: fadeIn .35s ease; }
+  .screen.active{ display:flex; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+  header.top{ text-align:center; padding:10px 0 6px; }
+  .brand{ font-family:'Lalezar',cursive; font-size:32px; letter-spacing:1px; color:var(--gold-soft); text-shadow:0 2px 0 rgba(0,0,0,.35); margin:0; }
+  .brand small{ display:block; font-family:'Tajawal',sans-serif; font-size:12px; color:var(--ink-dim); font-weight:500; letter-spacing:3px; margin-top:2px; }
+  h2.title{ font-family:'Lalezar',cursive; font-size:22px; color:var(--gold-soft); margin:0 0 4px; text-align:right;}
+  p.sub{ color:var(--ink-dim); text-align:center; font-size:13.5px; margin:0 0 14px; line-height:1.7;}
+  .card{ background:linear-gradient(180deg, var(--panel), var(--bg-1)); border:1px solid var(--line); border-radius:18px; padding:16px; box-shadow:var(--shadow); }
+  .stack{ display:flex; flex-direction:column; gap:12px; }
+  .btn{ appearance:none; border:none; cursor:pointer; font-family:'Tajawal',sans-serif; font-weight:700; font-size:15.5px; padding:14px 16px; border-radius:14px; display:flex; align-items:center; justify-content:center; gap:8px; transition:transform .12s ease; width:100%; text-decoration:none; }
+  .btn:active{ transform:scale(.97); }
+  .btn-primary{ background:linear-gradient(180deg, var(--gold-soft), var(--gold)); color:#241203; box-shadow:0 8px 20px rgba(212,169,79,.25);}
+  .btn-ghost{ background:transparent; color:var(--ink); border:1px solid var(--line); }
+  .btn-teal{ background:linear-gradient(180deg,#3cb6a1,var(--teal)); color:#06231d; }
+  .btn-danger{ background:transparent; color:var(--danger); border:1px solid rgba(193,68,58,.4); }
+  .btn-sm{ padding:9px 12px; font-size:13px; border-radius:10px; width:auto;}
+  .btn:disabled{ opacity:.4; pointer-events:none; }
+  input[type=text]{ width:100%; background:var(--bg-0); border:1px solid var(--line); color:var(--ink); padding:13px 14px; border-radius:12px; font-family:'Tajawal',sans-serif; font-size:15px; outline:none; }
+  input[type=text]:focus{ border-color:var(--gold); }
+  .row{ display:flex; gap:8px; } .row > *{ flex:1; }
+  .team-chip{ display:flex; align-items:center; justify-content:space-between; background:var(--bg-0); border:1px solid var(--line); border-radius:12px; padding:11px 14px; font-weight:700; font-size:14.5px; }
+  .team-chip .score{ color:var(--gold-soft); font-family:'Lalezar',cursive; font-size:17px; }
+  .chip-x{ color:var(--danger); background:none; border:none; font-size:18px; cursor:pointer; padding:0 4px;}
+  .stepper{ display:flex; align-items:center; justify-content:center; gap:18px; }
+  .stepper button{ width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:var(--bg-0); color:var(--gold-soft); font-size:18px; font-weight:900; cursor:pointer; }
+  .stepper .num{ font-family:'Lalezar',cursive; font-size:22px; color:var(--gold-soft); min-width:50px; text-align:center;}
+  .opt-row{ display:flex; gap:8px; }
+  .opt-btn{ flex:1; text-align:center; background:var(--bg-0); border:1px solid var(--line); border-radius:12px; padding:11px 6px; font-weight:700; font-size:13.5px; cursor:pointer; }
+  .opt-btn.on{ border-color:var(--gold); background:rgba(212,169,79,.14); color:var(--gold-soft); }
+  footer.hint{ text-align:center; color:var(--ink-dim); font-size:12px; margin-top:14px; line-height:1.8; }
+
+  .pass-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; }
+  .turn-label{ text-align:center; }
+  .turn-label .to{ color:var(--ink-dim); font-size:13px; letter-spacing:2px; }
+  .turn-label .name{ font-family:'Lalezar',cursive; font-size:30px; color:var(--gold-soft); margin-top:4px;}
+
+  .play-wrap{ flex:1; display:flex; flex-direction:column; gap:14px; }
+  .timer-bar{ display:flex; align-items:center; justify-content:space-between; }
+  .timer-num{ font-family:'Lalezar',cursive; font-size:34px; color:var(--gold-soft); }
+  .score-pill{ background:var(--bg-0); border:1px solid var(--line); border-radius:20px; padding:8px 16px; font-weight:700; font-size:14px; }
+  .word-card{ flex:1; background:linear-gradient(180deg, var(--panel), var(--bg-1)); border:3px solid var(--gold); border-radius:22px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-shadow:var(--shadow); text-align:center; }
+  .word-card .main-word{ font-family:'Lalezar',cursive; font-size:38px; color:var(--gold-soft); margin-bottom:16px; line-height:1.2; }
+  .word-card .taboo-line{ display:flex; align-items:center; gap:8px; color:#ff8a80; font-weight:700; font-size:16px; margin:5px 0; }
+  .word-card .taboo-line .x{ font-size:13px; }
+  .action-row{ display:flex; gap:10px; }
+  .action-row .btn{ font-size:16px; padding:16px; }
+
+  .result-line{ display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px dashed var(--line); font-size:14px;}
+  .result-line:last-child{ border-bottom:none; }
+  .leader{ display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .leader:last-child{ border-bottom:none; }
+  .leader .rank{ font-family:'Lalezar',cursive; color:var(--gold-soft); font-size:20px; width:26px; text-align:center;}
+  .leader .nm{ flex:1; font-weight:700; }
+  .leader .sc{ font-family:'Lalezar',cursive; color:var(--gold-soft); font-size:20px; }
+
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--panel); border:1px solid var(--gold); color:var(--ink); padding:11px 20px; border-radius:30px; font-size:13.5px; font-weight:700; box-shadow:var(--shadow); z-index:50; opacity:0; pointer-events:none; transition:opacity .3s, bottom .3s; }
+  .toast.show{ opacity:1; bottom:34px; }
+</style>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="app" id="app">
+
+  <!-- ============ HOME / SETUP ============ -->
+  <section class="screen active" id="screen-home">
+    <header class="top">
+      <h1 class="brand">قول بس لا تقول<small>لعبة تخمين الكلمات</small></h1>
+    </header>
+    <div class="row" style="max-width:320px;margin:0 auto 12px;gap:8px;">
+      <a class="btn btn-ghost btn-sm" href="./برا-السالفة.html">← الألعاب</a>
+      <button class="btn btn-ghost btn-sm" onclick="showScreen('screen-rules')">📜 القوانين</button>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <h2 class="title" style="margin:0;font-size:17px;">الفرق</h2>
+          <button class="btn btn-danger btn-sm" onclick="resetScores()">🗑️ تصفير النقاط</button>
+        </div>
+        <div class="row" style="margin-bottom:10px;">
+          <input type="text" id="teamInput" placeholder="اسم الفريق..." maxlength="16">
+          <button class="btn btn-primary btn-sm" style="flex:0 0 60px;" onclick="addTeam()">➕</button>
+        </div>
+        <div class="stack" id="teamList" style="gap:8px;"></div>
+        <p class="sub" style="margin:10px 0 0;font-size:12px;" id="teamCountMsg"></p>
+      </div>
+
+      <div class="card">
+        <h2 class="title" style="font-size:17px;margin-bottom:10px;">مدة الجولة (ثانية)</h2>
+        <div class="opt-row" id="durationRow"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="title" style="font-size:17px;margin-bottom:6px;">النقاط الفائزة</h2>
+        <div class="stepper">
+          <button onclick="changeTarget(5)">+</button>
+          <div class="num" id="targetNum">30</div>
+          <button onclick="changeTarget(-5)">−</button>
+        </div>
+        <p class="sub" style="font-size:11.5px;margin-top:8px;">أول فريق يوصل لهذا الرقم يفوز</p>
+      </div>
+
+      <button class="btn btn-primary" id="startBtn" onclick="startGame()">🎬 ابدأ اللعبة</button>
+    </div>
+    <footer class="hint">فريقين أو أكثر، جهاز واحد يتمرر — الشارح يشرح الكلمة لفريقه بدون ما يقول أي كلمة من الكلمات الممنوعة</footer>
+  </section>
+
+  <!-- ============ TEAM TURN START ============ -->
+  <section class="screen" id="screen-turn">
+    <header class="top"><h1 class="brand" style="font-size:22px;">دور الفريق</h1></header>
+    <div class="pass-wrap">
+      <div class="turn-label">
+        <div class="to">دور فريق</div>
+        <div class="name" id="turnTeamName">—</div>
+      </div>
+      <p class="sub" style="max-width:280px;">مرّر الجهاز لأي شخص من الفريق يبي يشرح الكلمات لباقي الفريق. باقي الفرق يستمعون ويتأكدون ما يقول كلمة ممنوعة!</p>
+      <button class="btn btn-primary" style="max-width:260px;" onclick="beginRound()">▶ ابدأ الجولة (<span id="turnDurationLabel">60</span> ثانية)</button>
+    </div>
+  </section>
+
+  <!-- ============ PLAY (word cards) ============ -->
+  <section class="screen" id="screen-play">
+    <div class="play-wrap">
+      <div class="timer-bar">
+        <div class="score-pill">✅ <span id="correctCount">0</span></div>
+        <div class="timer-num" id="playTimer">60</div>
+        <div class="score-pill" id="playTeamPill">—</div>
+      </div>
+      <div class="word-card" id="wordCard">
+        <div class="main-word" id="mainWord">—</div>
+        <div id="tabooList"></div>
+      </div>
+      <div class="action-row">
+        <button class="btn btn-danger" onclick="skipWord()">⏭️ تخطي</button>
+        <button class="btn btn-teal" onclick="correctWord()">✅ صح</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ROUND RESULT ============ -->
+  <section class="screen" id="screen-round-result">
+    <header class="top"><h1 class="brand" style="font-size:22px;">⏱️ خلص الوقت</h1></header>
+    <div class="card" style="text-align:center;">
+      <p class="sub" style="margin-bottom:4px;">فريق</p>
+      <div style="font-family:'Lalezar',cursive;font-size:26px;color:var(--gold-soft);" id="resTeamName">—</div>
+      <p class="sub" style="margin:10px 0 4px;">جابوا</p>
+      <div style="font-family:'Lalezar',cursive;font-size:44px;color:var(--teal);" id="resCorrectCount">0</div>
+      <p class="sub" style="margin:4px 0 0;">كلمة صحيحة</p>
+    </div>
+    <button class="btn btn-primary" style="margin-top:16px;" onclick="applyRoundScore()">إضافة النقاط ومتابعة ←</button>
+  </section>
+
+  <!-- ============ WINNER ============ -->
+  <section class="screen" id="screen-winner">
+    <header class="top"><h1 class="brand" style="font-size:22px;">🏆 النتيجة النهائية</h1></header>
+    <div class="card" style="text-align:center;margin-bottom:14px;">
+      <div class="sub" style="margin-bottom:6px;">الفريق الفائز</div>
+      <div style="font-family:'Lalezar',cursive;font-size:30px;color:var(--gold-soft);" id="winnerName">—</div>
+    </div>
+    <div class="card"><div id="finalLeaderList"></div></div>
+    <div class="stack" style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="playAgain()">🔁 لعبة جديدة (نفس الفرق)</button>
+      <button class="btn btn-ghost" onclick="backToSetup()">⚙️ تعديل الفرق</button>
+    </div>
+  </section>
+
+  <!-- ============ RULES ============ -->
+  <section class="screen" id="screen-rules">
+    <header class="top"><h1 class="brand" style="font-size:22px;">📜 قوانين اللعبة</h1></header>
+    <div class="stack">
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">الفكرة</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2;margin:0;">
+          فريقين أو أكثر يتنافسون. كل دور، شخص من الفريق يشرح كلمة لباقي فريقه بدون ما يستخدم أي كلمة من الكلمات الممنوعة المكتوبة تحتها، وباقي الفريق يحاولون يخمّنون قبل ما ينتهي الوقت.
+        </p>
+      </div>
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">خطوات اللعب</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2.1;margin:0;">
+          1. أضف الفرق واختر مدة الجولة والنقاط الفائزة<br>
+          2. بدور كل فريق، شخص واحد يشرح والباقي يخمّنون<br>
+          3. اضغط "✅ صح" لما يخمّنون صح، أو "⏭️ تخطي" إذا الكلمة صعبة<br>
+          4. لما ينتهي الوقت، تنضاف نقاط الكلمات الصحيحة لرصيد الفريق<br>
+          5. الدور ينتقل للفريق التالي، وأول فريق يوصل للنقاط المحددة يفوز
+        </p>
+      </div>
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">تنبيه</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2;margin:0;">
+          إذا الشارح قال كلمة ممنوعة بالغلط، الاتفاق بينكم إنه يصير عليه تنبيه أو تخسر تلك الكلمة — القرار للفريق قبل البداية.
+        </p>
+      </div>
+      <button class="btn btn-primary" onclick="showScreen('screen-home')">رجوع ←</button>
+    </div>
+  </section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== WORD BANK ===================== */
+const CARDS = [
+  {w:"قهوة", t:["فنجان","كافيين","بن","صباح"]},
+  {w:"مطر", t:["سحاب","ماء","مظلة","برق"]},
+  {w:"مدرسة", t:["معلم","طالب","كتاب","صف"]},
+  {w:"سيارة", t:["عجلة","بنزين","قيادة","طريق"]},
+  {w:"جوال", t:["اتصال","رسالة","شاشة","تطبيق"]},
+  {w:"شمس", t:["نهار","حرارة","ضوء","صيف"]},
+  {w:"قمر", t:["ليل","نجوم","سماء","هلال"]},
+  {w:"بحر", t:["ماء","سمك","موج","سباحة"]},
+  {w:"جبل", t:["مرتفع","تسلق","صخر","قمة"]},
+  {w:"مستشفى", t:["طبيب","مريض","دواء","إسعاف"]},
+  {w:"مطعم", t:["طعام","نادل","قائمة","حجز"]},
+  {w:"طائرة", t:["مطار","طيار","سفر","جناح"]},
+  {w:"كرة قدم", t:["ملعب","هدف","لاعب","حكم"]},
+  {w:"بيتزا", t:["جبن","إيطاليا","فرن","شريحة"]},
+  {w:"قطة", t:["مواء","ذيل","أليف","خدش"]},
+  {w:"كلب", t:["نباح","وفاء","حراسة","عظمة"]},
+  {w:"ثلاجة", t:["برودة","مطبخ","طعام","كهرباء"]},
+  {w:"مفتاح", t:["باب","قفل","معدن","جيب"]},
+  {w:"مظلة", t:["مطر","شمس","حماية","فتح"]},
+  {w:"ساعة", t:["وقت","معصم","دقائق","تكتك"]},
+  {w:"نظارة", t:["عين","شمس","رؤية","عدسة"]},
+  {w:"كتاب", t:["قراءة","صفحات","مكتبة","قصة"]},
+  {w:"قلم", t:["كتابة","حبر","ورقة","مدرسة"]},
+  {w:"حقيبة", t:["سفر","ظهر","كتب","حمل"]},
+  {w:"دراجة", t:["عجلات","بدالة","رياضة","طريق"]},
+  {w:"مسبح", t:["سباحة","ماء","صيف","غطس"]},
+  {w:"صحراء", t:["رمل","حر","جمل","واحة"]},
+  {w:"غابة", t:["أشجار","حيوانات","أخضر","كثيف"]},
+  {w:"مطبخ", t:["طبخ","فرن","طعام","سكاكين"]},
+  {w:"غرفة نوم", t:["سرير","نوم","وسادة","بيت"]},
+  {w:"متجر", t:["شراء","بيع","سلع","كاشير"]},
+  {w:"بنك", t:["مال","حساب","صراف","بطاقة"]},
+  {w:"مسجد", t:["صلاة","مئذنة","دين","جامع"]},
+  {w:"حديقة", t:["أشجار","لعب","نزهة","أخضر"]},
+  {w:"شاطئ", t:["رمل","بحر","مظلة","سباحة"]},
+  {w:"طائر", t:["ريش","طيران","منقار","عش"]},
+  {w:"سمك", t:["بحر","خياشيم","سباحة","صيد"]},
+  {w:"أسد", t:["ملك الغابة","زئير","مفترس","لبؤة"]},
+  {w:"فيل", t:["خرطوم","ضخم","أنياب","أفريقيا"]},
+  {w:"طبيب", t:["مستشفى","مريض","دواء","سماعة"]},
+  {w:"مهندس", t:["بناء","تصميم","خرائط","حساب"]},
+  {w:"معلم", t:["مدرسة","طالب","سبورة","درس"]},
+  {w:"شرطي", t:["قانون","سيارة","زي","مرور"]},
+  {w:"طباخ", t:["مطعم","طبخ","مطبخ","وصفة"]},
+  {w:"مصور", t:["كاميرا","صورة","لقطة","عدسة"]},
+  {w:"عيد ميلاد", t:["كيك","شموع","هدية","احتفال"]}
+];
+
+/* ===================== STATE ===================== */
+let state = { teams: [], duration: 60, target: 30 };
+let game = null; // {order, teamPos, deck, deckPos, correctCount, timeLeft, timerHandle}
+const STORAGE_KEY = 'qol_bas_la_taqul_v1';
+
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){ const d = JSON.parse(raw); if(d.teams) state.teams = d.teams; if(d.duration) state.duration = d.duration; if(d.target) state.target = d.target; }
+  }catch(e){}
+}
+
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1600); }
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ===================== SETUP ===================== */
+function renderTeams(){
+  const list = document.getElementById('teamList'); list.innerHTML = '';
+  state.teams.forEach((t,i)=>{
+    const div = document.createElement('div'); div.className='team-chip';
+    div.innerHTML = `<span>${t.name}</span><span style="display:flex;align-items:center;gap:10px;"><span class="score">${t.score} نقطة</span><button class="chip-x" onclick="removeTeam(${i})">✕</button></span>`;
+    list.appendChild(div);
+  });
+  const msg = document.getElementById('teamCountMsg');
+  msg.textContent = state.teams.length < 2 ? `أضف ${2-state.teams.length} فرق على الأقل` : `عدد الفرق: ${state.teams.length}`;
+  document.getElementById('startBtn').disabled = state.teams.length < 2;
+}
+function addTeam(){
+  const input = document.getElementById('teamInput');
+  const name = input.value.trim();
+  if(!name) return;
+  if(state.teams.some(t=>t.name===name)){ showToast('الاسم موجود مسبقًا'); return; }
+  state.teams.push({name, score:0});
+  input.value=''; saveState(); renderTeams();
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('teamInput').addEventListener('keydown', e=>{ if(e.key==='Enter') addTeam(); });
+});
+function removeTeam(i){ state.teams.splice(i,1); saveState(); renderTeams(); }
+
+function renderDurationRow(){
+  const row = document.getElementById('durationRow'); row.innerHTML='';
+  [30,60,90].forEach(sec=>{
+    const btn = document.createElement('div');
+    btn.className = 'opt-btn' + (state.duration===sec ? ' on':'');
+    btn.textContent = sec;
+    btn.onclick = ()=>{ state.duration = sec; saveState(); renderDurationRow(); };
+    row.appendChild(btn);
+  });
+}
+function changeTarget(delta){
+  state.target = Math.max(10, state.target + delta);
+  document.getElementById('targetNum').textContent = state.target;
+  saveState();
+}
+function resetScores(){
+  if(!confirm('متأكد تبي تصفر كل النقاط؟')) return;
+  state.teams.forEach(t=>t.score=0); saveState(); renderTeams(); showToast('تم تصفير النقاط');
+}
+function backToSetup(){ renderTeams(); renderDurationRow(); document.getElementById('targetNum').textContent = state.target; showScreen('screen-home'); }
+
+/* ===================== GAME FLOW ===================== */
+function startGame(){
+  if(state.teams.length < 2){ showToast('أضف فريقين على الأقل'); return; }
+  game = { order: state.teams.map((t,i)=>i), teamPos: 0, deck: shuffle(CARDS), deckPos: 0, correctCount: 0, timeLeft: state.duration, timerHandle: null };
+  goToTeamTurn();
+}
+function playAgain(){
+  game = { order: state.teams.map((t,i)=>i), teamPos: 0, deck: shuffle(CARDS), deckPos: 0, correctCount: 0, timeLeft: state.duration, timerHandle: null };
+  goToTeamTurn();
+}
+function goToTeamTurn(){
+  const idx = game.order[game.teamPos];
+  document.getElementById('turnTeamName').textContent = state.teams[idx].name;
+  document.getElementById('turnDurationLabel').textContent = state.duration;
+  showScreen('screen-turn');
+}
+function beginRound(){
+  game.correctCount = 0;
+  game.timeLeft = state.duration;
+  document.getElementById('correctCount').textContent = '0';
+  document.getElementById('playTeamPill').textContent = state.teams[game.order[game.teamPos]].name;
+  document.getElementById('playTimer').textContent = game.timeLeft;
+  showScreen('screen-play');
+  showNextCard();
+  clearInterval(game.timerHandle);
+  game.timerHandle = setInterval(()=>{
+    game.timeLeft--;
+    document.getElementById('playTimer').textContent = game.timeLeft;
+    if(game.timeLeft <= 5){ document.getElementById('playTimer').style.color = 'var(--danger)'; }
+    if(game.timeLeft <= 0){ clearInterval(game.timerHandle); endRound(); }
+  }, 1000);
+}
+function nextCardData(){
+  if(game.deckPos >= game.deck.length){ game.deck = shuffle(CARDS); game.deckPos = 0; }
+  return game.deck[game.deckPos++];
+}
+function showNextCard(){
+  const c = nextCardData();
+  document.getElementById('mainWord').textContent = c.w;
+  const list = document.getElementById('tabooList');
+  list.innerHTML = '';
+  c.t.forEach(w=>{
+    const line = document.createElement('div');
+    line.className = 'taboo-line';
+    line.innerHTML = `<span class="x">🚫</span><span>${w}</span>`;
+    list.appendChild(line);
+  });
+}
+function correctWord(){
+  game.correctCount++;
+  document.getElementById('correctCount').textContent = game.correctCount;
+  showNextCard();
+}
+function skipWord(){ showNextCard(); }
+
+function endRound(){
+  document.getElementById('playTimer').style.color = 'var(--gold-soft)';
+  const idx = game.order[game.teamPos];
+  document.getElementById('resTeamName').textContent = state.teams[idx].name;
+  document.getElementById('resCorrectCount').textContent = game.correctCount;
+  showScreen('screen-round-result');
+}
+function applyRoundScore(){
+  const idx = game.order[game.teamPos];
+  state.teams[idx].score += game.correctCount;
+  saveState();
+  if(state.teams[idx].score >= state.target){
+    showWinner();
+    return;
+  }
+  game.teamPos = (game.teamPos + 1) % game.order.length;
+  goToTeamTurn();
+}
+function showWinner(){
+  const sorted = [...state.teams].sort((a,b)=>b.score-a.score);
+  document.getElementById('winnerName').textContent = sorted[0].name;
+  const list = document.getElementById('finalLeaderList'); list.innerHTML='';
+  sorted.forEach((t,i)=>{
+    const line = document.createElement('div'); line.className='leader';
+    const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    line.innerHTML = `<span class="rank">${medal}</span><span class="nm">${t.name}</span><span class="sc">${t.score}</span>`;
+    list.appendChild(line);
+  });
+  showScreen('screen-winner');
+}
+
+/* ===================== INIT ===================== */
+loadState();
+renderTeams();
+renderDurationRow();
+document.getElementById('targetNum').textContent = state.target;
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>

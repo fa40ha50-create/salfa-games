@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#150c28">
+<title>كود نيمز</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#150c28; --bg-1:#1f1240; --bg-2:#2b1a54; --panel:#241638;
+    --gold:#d4a94f; --gold-soft:#e8c876; --teal:#2e9e8c; --ink:#f4ecd8; --ink-dim:#c9bfe0;
+    --danger:#c1443a; --blue:#3b82f6; --line:rgba(212,169,79,.25); --shadow:0 20px 50px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{ margin:0; min-height:100vh; min-height:100dvh;
+    background: radial-gradient(1200px 600px at 50% -10%, var(--bg-2), transparent 60%),
+                radial-gradient(900px 500px at 100% 110%, #3a1f5c, transparent 60%), var(--bg-0);
+    color:var(--ink); font-family:'Tajawal',sans-serif;
+    display:flex; justify-content:center;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+    overflow-x:hidden;
+  }
+  .app{ width:100%; max-width:480px; min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; position:relative; padding:18px 18px calc(18px + env(safe-area-inset-bottom)); }
+  .bg-pattern{ position:fixed; inset:0; pointer-events:none; opacity:.08; z-index:0;
+    background-image: repeating-linear-gradient(45deg, var(--gold) 0 1px, transparent 1px 26px),
+                       repeating-linear-gradient(-45deg, var(--gold) 0 1px, transparent 1px 26px); }
+  .screen{ position:relative; z-index:1; display:none; flex-direction:column; flex:1; animation: fadeIn .35s ease; }
+  .screen.active{ display:flex; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+  header.top{ text-align:center; padding:10px 0 6px; }
+  .brand{ font-family:'Lalezar',cursive; font-size:32px; letter-spacing:1px; color:var(--gold-soft); text-shadow:0 2px 0 rgba(0,0,0,.35); margin:0; }
+  .brand small{ display:block; font-family:'Tajawal',sans-serif; font-size:12px; color:var(--ink-dim); font-weight:500; letter-spacing:3px; margin-top:2px; }
+  h2.title{ font-family:'Lalezar',cursive; font-size:22px; color:var(--gold-soft); margin:0 0 4px; text-align:right;}
+  p.sub{ color:var(--ink-dim); text-align:center; font-size:13.5px; margin:0 0 14px; line-height:1.7;}
+  .card{ background:linear-gradient(180deg, var(--panel), var(--bg-1)); border:1px solid var(--line); border-radius:18px; padding:16px; box-shadow:var(--shadow); }
+  .stack{ display:flex; flex-direction:column; gap:12px; }
+  .btn{ appearance:none; border:none; cursor:pointer; font-family:'Tajawal',sans-serif; font-weight:700; font-size:15.5px; padding:14px 16px; border-radius:14px; display:flex; align-items:center; justify-content:center; gap:8px; transition:transform .12s ease; width:100%; text-decoration:none; }
+  .btn:active{ transform:scale(.97); }
+  .btn-primary{ background:linear-gradient(180deg, var(--gold-soft), var(--gold)); color:#241203; box-shadow:0 8px 20px rgba(212,169,79,.25);}
+  .btn-ghost{ background:transparent; color:var(--ink); border:1px solid var(--line); }
+  .btn-teal{ background:linear-gradient(180deg,#3cb6a1,var(--teal)); color:#06231d; }
+  .btn-danger{ background:transparent; color:var(--danger); border:1px solid rgba(193,68,58,.4); }
+  .btn-sm{ padding:9px 12px; font-size:13px; border-radius:10px; width:auto;}
+  .btn:disabled{ opacity:.4; pointer-events:none; }
+  input[type=text]{ width:100%; background:var(--bg-0); border:1px solid var(--line); color:var(--ink); padding:13px 14px; border-radius:12px; font-family:'Tajawal',sans-serif; font-size:15px; outline:none; }
+  input[type=text]:focus{ border-color:var(--gold); }
+  .row{ display:flex; gap:8px; } .row > *{ flex:1; }
+  .opt-row{ display:flex; gap:8px; }
+  .opt-btn{ flex:1; text-align:center; background:var(--bg-0); border:1px solid var(--line); border-radius:12px; padding:11px 6px; font-weight:700; font-size:13.5px; cursor:pointer; }
+  .opt-btn.on{ border-color:var(--gold); background:rgba(212,169,79,.14); color:var(--gold-soft); }
+  .stepper{ display:flex; align-items:center; justify-content:center; gap:10px; }
+  .stepper button{ width:32px; height:32px; border-radius:50%; border:1px solid var(--line); background:var(--bg-0); color:var(--gold-soft); font-size:16px; font-weight:900; cursor:pointer; }
+  .stepper .num{ font-family:'Lalezar',cursive; color:var(--gold-soft); text-align:center;}
+  footer.hint{ text-align:center; color:var(--ink-dim); font-size:12px; margin-top:14px; line-height:1.8; }
+
+  .pass-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; }
+  .turn-label{ text-align:center; }
+  .turn-label .to{ color:var(--ink-dim); font-size:13px; letter-spacing:2px; }
+  .turn-label .name{ font-family:'Lalezar',cursive; font-size:28px; color:var(--gold-soft); margin-top:4px;}
+
+  .status-bar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .team-score{ display:flex; align-items:center; gap:6px; font-weight:900; font-size:15px; padding:7px 12px; border-radius:20px; }
+  .team-score.red{ background:rgba(193,68,58,.18); color:#ff8a80; }
+  .team-score.blue{ background:rgba(59,130,246,.18); color:#7fb1ff; }
+
+  .board{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; flex:1; }
+  .board.size25{ grid-template-columns:repeat(5,1fr); }
+  .tile{ background:var(--bg-0); border:1px solid var(--line); border-radius:10px; display:flex; align-items:center; justify-content:center; text-align:center; font-weight:700; font-size:11.5px; padding:4px 3px; cursor:pointer; min-height:56px; line-height:1.3; color:var(--ink); transition:transform .1s ease; }
+  .tile:active{ transform:scale(.95); }
+  .tile.revealed{ cursor:default; opacity:.9; }
+  .tile.red{ background:linear-gradient(160deg,#c1443a,#7a231c); border-color:#ff8a80; color:#fff; }
+  .tile.blue{ background:linear-gradient(160deg,#3b82f6,#1d4ed8); border-color:#7fb1ff; color:#fff; }
+  .tile.neutral{ background:linear-gradient(160deg,#5a5470,#3a3550); border-color:#8b85a0; color:#e8e4f0; }
+  .tile.assassin{ background:linear-gradient(160deg,#111,#000); border-color:#666; color:#ff4d4d; }
+  .tile.key-red{ box-shadow: inset 0 0 0 2px #ff8a80; }
+  .tile.key-blue{ box-shadow: inset 0 0 0 2px #7fb1ff; }
+  .tile.key-neutral{ box-shadow: inset 0 0 0 2px #8b85a0; }
+  .tile.key-assassin{ box-shadow: inset 0 0 0 2px #ff4d4d; }
+
+  .result-line{ display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px dashed var(--line); font-size:14px;}
+  .result-line:last-child{ border-bottom:none; }
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--panel); border:1px solid var(--gold); color:var(--ink); padding:11px 20px; border-radius:30px; font-size:13.5px; font-weight:700; box-shadow:var(--shadow); z-index:50; opacity:0; pointer-events:none; transition:opacity .3s, bottom .3s; }
+  .toast.show{ opacity:1; bottom:34px; }
+</style>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="app" id="app">
+
+  <!-- ============ HOME / SETUP ============ -->
+  <section class="screen active" id="screen-home">
+    <header class="top"><h1 class="brand">كود نيمز<small>فريقين × تلميحات</small></h1></header>
+    <div class="row" style="max-width:320px;margin:0 auto 12px;gap:8px;">
+      <a class="btn btn-ghost btn-sm" href="./برا-السالفة.html">← الألعاب</a>
+      <button class="btn btn-ghost btn-sm" onclick="showScreen('screen-rules')">📜 القوانين</button>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <h2 class="title" style="font-size:17px;margin-bottom:10px;">أسماء الفريقين</h2>
+        <div class="stack" style="gap:8px;">
+          <input type="text" id="redTeamName" placeholder="اسم الفريق الأحمر" value="الفريق الأحمر" maxlength="18">
+          <input type="text" id="blueTeamName" placeholder="اسم الفريق الأزرق" value="الفريق الأزرق" maxlength="18">
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="title" style="font-size:17px;margin-bottom:10px;">حجم اللوحة</h2>
+        <div class="opt-row" id="sizeRow"></div>
+        <p class="sub" style="font-size:11.5px;margin:8px 0 0;">16 كلمة = جولة أسرع، 25 كلمة = جولة أطول وأصعب</p>
+      </div>
+
+      <button class="btn btn-primary" onclick="startGame()">🎬 ابدأ اللعبة</button>
+    </div>
+    <footer class="hint">تحتاج مرشد (Spymaster) وحد من كل فريق يعطي تلميحات بكلمة وحدة + رقم، والباقي يخمّنون على اللوحة</footer>
+  </section>
+
+  <!-- ============ SPYMASTER KEY (pass device) ============ -->
+  <section class="screen" id="screen-key">
+    <header class="top"><h1 class="brand" style="font-size:22px;">🗝️ مفتاح المرشد</h1></header>
+    <div class="pass-wrap" style="gap:16px;">
+      <div class="turn-label"><div class="to">مرّر الجهاز لمرشد</div><div class="name" id="keyTeamName">—</div></div>
+      <p class="sub" style="max-width:300px;">بس المرشد يشوف هالشاشة! الكلمات المؤطرة بلون فريقك هي كلماتك، الرمادي محايد، والأسود هو "القاتل" — تجنبوا التلميح عليه!</p>
+      <button class="btn btn-teal" id="showKeyBtn" style="max-width:240px;" onclick="revealKey()">👁️ إظهار المفاتيح</button>
+      <div class="board" id="keyBoard" style="display:none;width:100%;"></div>
+
+      <div class="card" id="hintCard" style="display:none;width:100%;">
+        <h2 class="title" style="font-size:15px;margin-bottom:8px;">💡 اكتب تلميحك (اختياري)</h2>
+        <div class="row" style="gap:8px;">
+          <input type="text" id="hintWordInput" placeholder="كلمة التلميح..." maxlength="20" style="flex:2;">
+          <div class="stepper" style="flex:1;justify-content:center;">
+            <button onclick="changeHintNum(-1)" type="button">−</button>
+            <div class="num" id="hintNumDisplay" style="font-size:18px;min-width:22px;">1</div>
+            <button onclick="changeHintNum(1)" type="button">+</button>
+          </div>
+        </div>
+        <p class="sub" style="font-size:11px;margin:8px 0 0;">إذا كتبته، بيظهر بأعلى شاشة فريقك وقت التخمين</p>
+      </div>
+
+      <button class="btn btn-primary" id="keyDoneBtn" style="max-width:260px;display:none;" onclick="startGuessing()">تم، مرر الجهاز لفريقي ←</button>
+    </div>
+  </section>
+
+  <!-- ============ GUESSING BOARD (public) ============ -->
+  <section class="screen" id="screen-board">
+    <div class="status-bar">
+      <div class="team-score red" id="redScorePill">🔴 — : —</div>
+      <div class="turn-label" style="text-align:center;"><div class="name" id="turnTeamLabel" style="font-size:18px;">—</div></div>
+      <div class="team-score blue" id="blueScorePill">🔵 — : —</div>
+    </div>
+    <div id="hintBanner" style="display:none;text-align:center;background:linear-gradient(180deg, var(--panel), var(--bg-1));border:1px solid var(--gold);border-radius:14px;padding:10px;margin-bottom:10px;">
+      <span style="font-size:12px;color:var(--ink-dim);">💡 التلميح</span>
+      <div style="font-family:'Lalezar',cursive;font-size:22px;color:var(--gold-soft);" id="hintBannerText">—</div>
+    </div>
+    <p class="sub" style="margin:0 0 10px;">المرشد يعطي تلميح بكلمة وحدة + رقم بصوت عالي، وفريقه يضغط على الكلمات اللي يعتقدون إنها المقصودة</p>
+    <div class="board" id="guessBoard"></div>
+    <button class="btn btn-danger" style="margin-top:12px;" onclick="endTurn()">⏭️ إنهاء الدور</button>
+  </section>
+
+  <!-- ============ WINNER ============ -->
+  <section class="screen" id="screen-winner">
+    <header class="top"><h1 class="brand" style="font-size:22px;">🏆 انتهت اللعبة</h1></header>
+    <div class="card" style="text-align:center;margin-bottom:14px;">
+      <div style="font-family:'Lalezar',cursive;font-size:26px;color:var(--gold-soft);" id="winnerText">—</div>
+    </div>
+    <div class="board" id="finalBoard"></div>
+    <div class="stack" style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="startGame()">🔁 لعبة جديدة</button>
+      <button class="btn btn-ghost" onclick="showScreen('screen-home')">⚙️ تعديل الإعدادات</button>
+    </div>
+  </section>
+
+  <!-- ============ RULES ============ -->
+  <section class="screen" id="screen-rules">
+    <header class="top"><h1 class="brand" style="font-size:22px;">📜 قوانين اللعبة</h1></header>
+    <div class="stack">
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">الفكرة</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2;margin:0;">
+          فريقين (أحمر وأزرق) يتنافسون على تخمين كلماتهم من لوحة كلمات مشتركة. كل فريق عنده "مرشد" يشوف لون كل كلمة سرًا، ويعطي فريقه تلميح بكلمة وحدة (وممكن رقم يوضح كم كلمة يقصد) بدون ما يقول أي كلمة من كلمات اللوحة نفسها.
+        </p>
+      </div>
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">خطوات اللعب</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2.1;margin:0;">
+          1. المرشد يمسك الجهاز بخصوصية ويشوف "المفتاح" (ألوان كل الكلمات)<br>
+          2. يعطي فريقه تلميح بصوت عالي (كلمة + عدد الكلمات المقصودة)<br>
+          3. يمرر الجهاز لأي شخص من فريقه، وفريقه يضغطون على الكلمات اللي يعتقدونها<br>
+          4. كل ما ضغطوا كلمة، لونها الحقيقي ينكشف للجميع<br>
+          5. إذا صحّوا (لون فريقهم) يقدرون يكملون التخمين، وإذا غلطوا أو ضغطوا "إنهاء الدور" ينتقل الدور للفريق الثاني
+        </p>
+      </div>
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">كيف تفوز / تخسر</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2.1;margin:0;">
+          • أول فريق يكشف كل كلماته يفوز 🎉<br>
+          • إذا فريق ضغط على الكلمة "السوداء" (القاتل) 💀 يخسر فورًا، وحتى لو كانت غلطة!
+        </p>
+      </div>
+      <button class="btn btn-primary" onclick="showScreen('screen-home')">رجوع ←</button>
+    </div>
+  </section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== WORD POOL ===================== */
+const WORD_POOL = [
+  "قهوة","مطر","مدرسة","سيارة","جوال","شمس","قمر","بحر","جبل","مستشفى",
+  "مطعم","طائرة","كرة قدم","بيتزا","قطة","كلب","ثلاجة","مفتاح","مظلة","ساعة",
+  "نظارة","كتاب","قلم","حقيبة","دراجة","مسبح","صحراء","غابة","مطبخ","متجر",
+  "بنك","حديقة","شاطئ","طائر","سمك","أسد","فيل","طبيب","مهندس","معلم",
+  "شرطي","طباخ","مصور","ذهب","فضة","نار","ثلج","ريح","نجمة","جسر",
+  "برج","قلعة","سفينة","قطار","حصان","تفاح","موز","عسل","ملح","سكر"
+];
+
+/* ===================== STATE ===================== */
+let state = { redName:'الفريق الأحمر', blueName:'الفريق الأزرق', boardSize:16 };
+let game = null;
+const STORAGE_KEY = 'codenames_game_v1';
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function loadState(){
+  try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw){ const d = JSON.parse(raw); Object.assign(state, d); } }catch(e){}
+}
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1600); }
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function renderSizeRow(){
+  const row = document.getElementById('sizeRow'); row.innerHTML='';
+  [16,25].forEach(n=>{
+    const btn = document.createElement('div');
+    btn.className = 'opt-btn' + (state.boardSize===n?' on':'');
+    btn.textContent = n + ' كلمة';
+    btn.onclick = ()=>{ state.boardSize = n; saveState(); renderSizeRow(); };
+    row.appendChild(btn);
+  });
+}
+
+/* ===================== START GAME ===================== */
+function startGame(){
+  state.redName = document.getElementById('redTeamName').value.trim() || 'الفريق الأحمر';
+  state.blueName = document.getElementById('blueTeamName').value.trim() || 'الفريق الأزرق';
+  saveState();
+
+  const n = state.boardSize;
+  const words = shuffle(WORD_POOL).slice(0, n);
+  const startTeam = Math.random() < 0.5 ? 'red' : 'blue';
+  let redCount, blueCount, neutralCount;
+  if(n === 16){ redCount = 6; blueCount = 5; neutralCount = 4; }
+  else { redCount = 9; blueCount = 8; neutralCount = 7; }
+  if(startTeam === 'blue'){ [redCount, blueCount] = [blueCount, redCount]; }
+
+  const colors = [];
+  for(let i=0;i<redCount;i++) colors.push('red');
+  for(let i=0;i<blueCount;i++) colors.push('blue');
+  for(let i=0;i<neutralCount;i++) colors.push('neutral');
+  colors.push('assassin');
+  const shuffledColors = shuffle(colors);
+
+  const tiles = words.map((w,i)=>({ word:w, color: shuffledColors[i], revealed:false }));
+
+  game = { tiles, turn: startTeam, redRemaining: redCount, blueRemaining: blueCount, size:n, over:false };
+  goToKey();
+}
+
+let hintNum = 1;
+function changeHintNum(delta){
+  hintNum = Math.max(1, Math.min(9, hintNum + delta));
+  document.getElementById('hintNumDisplay').textContent = hintNum;
+}
+function goToKey(){
+  document.getElementById('keyTeamName').textContent = game.turn==='red' ? state.redName : state.blueName;
+  document.getElementById('showKeyBtn').style.display = 'flex';
+  document.getElementById('keyBoard').style.display = 'none';
+  document.getElementById('hintCard').style.display = 'none';
+  document.getElementById('keyDoneBtn').style.display = 'none';
+  document.getElementById('hintWordInput').value = '';
+  hintNum = 1;
+  document.getElementById('hintNumDisplay').textContent = hintNum;
+  showScreen('screen-key');
+}
+function revealKey(){
+  const board = document.getElementById('keyBoard');
+  board.className = 'board' + (game.size===25 ? ' size25' : '');
+  board.innerHTML = '';
+  game.tiles.forEach(t=>{
+    const div = document.createElement('div');
+    let cls = 'tile key-' + t.color;
+    if(t.revealed) cls += ' ' + t.color + ' revealed';
+    div.className = cls;
+    div.textContent = t.word;
+    board.appendChild(div);
+  });
+  board.style.display = 'grid';
+  document.getElementById('showKeyBtn').style.display = 'none';
+  document.getElementById('hintCard').style.display = 'block';
+  document.getElementById('keyDoneBtn').style.display = 'flex';
+}
+function startGuessing(){
+  const word = document.getElementById('hintWordInput').value.trim();
+  game.currentHint = word ? { word, num: hintNum } : null;
+  showScreen('screen-board');
+  renderStatusBar();
+  renderHintBanner();
+  renderGuessBoard();
+}
+function renderHintBanner(){
+  const banner = document.getElementById('hintBanner');
+  if(game.currentHint){
+    document.getElementById('hintBannerText').textContent = `${game.currentHint.word} × ${game.currentHint.num}`;
+    banner.style.display = 'block';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+/* ===================== GUESSING ===================== */
+function renderStatusBar(){
+  document.getElementById('redScorePill').textContent = `🔴 ${state.redName}: ${game.redRemaining}`;
+  document.getElementById('blueScorePill').textContent = `🔵 ${state.blueName}: ${game.blueRemaining}`;
+  document.getElementById('turnTeamLabel').textContent = 'دور ' + (game.turn==='red' ? state.redName : state.blueName);
+}
+function renderGuessBoard(){
+  const board = document.getElementById('guessBoard');
+  board.className = 'board' + (game.size===25 ? ' size25' : '');
+  board.innerHTML = '';
+  game.tiles.forEach((t,i)=>{
+    const div = document.createElement('div');
+    div.className = 'tile' + (t.revealed ? (' '+t.color+' revealed') : '');
+    div.textContent = t.word;
+    if(!t.revealed){ div.onclick = ()=> guessTile(i); }
+    board.appendChild(div);
+  });
+}
+function guessTile(i){
+  const t = game.tiles[i];
+  if(t.revealed || game.over) return;
+  t.revealed = true;
+
+  if(t.color === 'assassin'){
+    renderGuessBoard(); renderStatusBar();
+    endGame(game.turn === 'red' ? 'blue' : 'red', `${game.turn==='red'?state.redName:state.blueName} ضغطوا على القاتل 💀`);
+    return;
+  }
+  if(t.color === 'red') game.redRemaining--;
+  if(t.color === 'blue') game.blueRemaining--;
+
+  renderGuessBoard(); renderStatusBar();
+
+  if(game.redRemaining <= 0){ endGame('red', `${state.redName} كشفوا كل كلماتهم! 🎉`); return; }
+  if(game.blueRemaining <= 0){ endGame('blue', `${state.blueName} كشفوا كل كلماتهم! 🎉`); return; }
+
+  if(t.color !== game.turn){
+    showToast(t.color==='neutral' ? 'كلمة محايدة! انتهى الدور' : 'كلمة الفريق الثاني! انتهى الدور');
+    setTimeout(switchTurn, 700);
+  }
+}
+function switchTurn(){
+  if(game.over) return;
+  game.turn = game.turn==='red' ? 'blue' : 'red';
+  goToKey();
+}
+function endTurn(){ switchTurn(); }
+
+function endGame(winner, reason){
+  game.over = true;
+  document.getElementById('winnerText').textContent = `${reason}\n${winner==='red'?state.redName:state.blueName} يفوز! 🏆`;
+  const board = document.getElementById('finalBoard');
+  board.className = 'board' + (game.size===25 ? ' size25' : '');
+  board.innerHTML = '';
+  game.tiles.forEach(t=>{
+    const div = document.createElement('div');
+    div.className = 'tile ' + t.color + ' revealed';
+    div.textContent = t.word;
+    board.appendChild(div);
+  });
+  showScreen('screen-winner');
+}
+
+/* ===================== INIT ===================== */
+loadState();
+renderSizeRow();
+document.getElementById('redTeamName').value = state.redName;
+document.getElementById('blueTeamName').value = state.blueName;
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
