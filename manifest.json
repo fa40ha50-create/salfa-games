@@ -1,8 +1,8 @@
 {
   "name": "ألعاب السالفة",
-  "start_url": "./index.html",
+  "short_name": "ألعاب السالفة",
   "description": "مجموعة ألعاب جماعية: برا السالفة، قول بس لا تقول، المافيا، كود نيمز",
-  "start_url": "./برا-السالفة.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
