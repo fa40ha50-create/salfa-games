@@ -1,7 +1,7 @@
-const CACHE_NAME = 'salfa-games-v1';
+const CACHE_NAME = 'salfa-games-v2';
 const ASSETS = [
-  './برا-السالفة.html',
   './index.html',
+  './قول-بس-لا-تقول.html',
   './المافيا.html',
   './كود-نيمز.html',
   './manifest.json',
