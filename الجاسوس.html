@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#150c28">
+<title>الجاسوس</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<style>
+  :root{
+    --bg-0:#150c28; --bg-1:#1f1240; --bg-2:#2b1a54; --panel:#241638;
+    --gold:#d4a94f; --gold-soft:#e8c876; --teal:#2e9e8c; --ink:#f4ecd8; --ink-dim:#c9bfe0;
+    --danger:#c1443a; --line:rgba(212,169,79,.25); --shadow:0 20px 50px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0; min-height:100vh; min-height:100dvh;
+    background: radial-gradient(1200px 600px at 50% -10%, var(--bg-2), transparent 60%),
+                radial-gradient(900px 500px at 100% 110%, #3a1f5c, transparent 60%), var(--bg-0);
+    color:var(--ink); font-family:'Tajawal',sans-serif;
+    display:flex; justify-content:center;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+    overflow-x:hidden;
+  }
+  .app{ width:100%; max-width:480px; min-height:100vh; min-height:100dvh; display:flex; flex-direction:column; position:relative; padding:18px 18px calc(18px + env(safe-area-inset-bottom)); }
+  .bg-pattern{ position:fixed; inset:0; pointer-events:none; opacity:.08; z-index:0;
+    background-image: repeating-linear-gradient(45deg, var(--gold) 0 1px, transparent 1px 26px),
+                       repeating-linear-gradient(-45deg, var(--gold) 0 1px, transparent 1px 26px); }
+  .screen{ position:relative; z-index:1; display:none; flex-direction:column; flex:1; animation: fadeIn .35s ease; }
+  .screen.active{ display:flex; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+  header.top{ text-align:center; padding:10px 0 6px; }
+  .brand{ font-family:'Lalezar',cursive; font-size:32px; letter-spacing:1px; color:var(--gold-soft); text-shadow:0 2px 0 rgba(0,0,0,.35); margin:0; }
+  .brand small{ display:block; font-family:'Tajawal',sans-serif; font-size:12px; color:var(--ink-dim); font-weight:500; letter-spacing:3px; margin-top:2px; }
+  h2.title{ font-family:'Lalezar',cursive; font-size:22px; color:var(--gold-soft); margin:0 0 4px; text-align:right;}
+  p.sub{ color:var(--ink-dim); text-align:center; font-size:13.5px; margin:0 0 14px; line-height:1.7;}
+  .card{ background:linear-gradient(180deg, var(--panel), var(--bg-1)); border:1px solid var(--line); border-radius:18px; padding:16px; box-shadow:var(--shadow); }
+  .stack{ display:flex; flex-direction:column; gap:12px; }
+  .btn{ appearance:none; border:none; cursor:pointer; font-family:'Tajawal',sans-serif; font-weight:700; font-size:15.5px; padding:14px 16px; border-radius:14px; display:flex; align-items:center; justify-content:center; gap:8px; transition:transform .12s ease; width:100%; text-decoration:none; }
+  .btn:active{ transform:scale(.97); }
+  .btn-primary{ background:linear-gradient(180deg, var(--gold-soft), var(--gold)); color:#241203; box-shadow:0 8px 20px rgba(212,169,79,.25);}
+  .btn-ghost{ background:transparent; color:var(--ink); border:1px solid var(--line); }
+  .btn-teal{ background:linear-gradient(180deg,#3cb6a1,var(--teal)); color:#06231d; }
+  .btn-danger{ background:transparent; color:var(--danger); border:1px solid rgba(193,68,58,.4); }
+  .btn-sm{ padding:9px 12px; font-size:13px; border-radius:10px; width:auto;}
+  .btn:disabled{ opacity:.4; pointer-events:none; }
+  input[type=text]{ width:100%; background:var(--bg-0); border:1px solid var(--line); color:var(--ink); padding:13px 14px; border-radius:12px; font-family:'Tajawal',sans-serif; font-size:15px; outline:none; }
+  input[type=text]:focus{ border-color:var(--gold); }
+  .row{ display:flex; gap:8px; } .row > *{ flex:1; }
+  .player-chip{ display:flex; align-items:center; justify-content:space-between; background:var(--bg-0); border:1px solid var(--line); border-radius:12px; padding:11px 14px; font-weight:700; font-size:14.5px; }
+  .player-chip .score{ color:var(--gold-soft); font-family:'Lalezar',cursive; font-size:17px; }
+  .chip-x{ color:var(--danger); background:none; border:none; font-size:18px; cursor:pointer; padding:0 4px;}
+  .stepper{ display:flex; align-items:center; justify-content:center; gap:18px; }
+  .stepper button{ width:42px; height:42px; border-radius:50%; border:1px solid var(--line); background:var(--bg-0); color:var(--gold-soft); font-size:20px; font-weight:900; cursor:pointer; }
+  .stepper .num{ font-family:'Lalezar',cursive; font-size:26px; color:var(--gold-soft); min-width:30px; text-align:center;}
+  footer.hint{ text-align:center; color:var(--ink-dim); font-size:12px; margin-top:14px; line-height:1.8; }
+
+  .pass-wrap{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; }
+  .turn-label{ text-align:center; }
+  .turn-label .to{ color:var(--ink-dim); font-size:13px; letter-spacing:2px; }
+  .turn-label .name{ font-family:'Lalezar',cursive; font-size:30px; color:var(--gold-soft); margin-top:4px;}
+
+  .medallion{ width:230px; height:230px; cursor:pointer; }
+  .medallion-content{ width:100%; height:100%; border-radius:26px; display:flex; align-items:center; justify-content:center; flex-direction:column; box-shadow:0 15px 40px rgba(0,0,0,.5); text-align:center; padding:18px; transition:transform .18s ease; background:radial-gradient(circle at 30% 25%, #3a2564, #1b0f33 70%); border:3px solid var(--gold); }
+  .medallion-content .seal{ width:60px; height:60px; border:2px solid var(--gold-soft); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:8px;}
+  .medallion-content .tap{ font-weight:700; color:var(--gold-soft); font-size:13px; letter-spacing:1px;}
+  .medallion-content.spy{ background:radial-gradient(circle at 30% 25%, #5c2420, #2a0f0d 70%); border-color:var(--danger); }
+  .medallion-content.citizen{ background:radial-gradient(circle at 30% 25%, #17493f, #0c261f 70%); border-color:var(--teal); }
+  .medallion-content .role{ font-family:'Lalezar',cursive; font-size:20px; line-height:1.3; margin-bottom:8px;}
+  .medallion-content .question{ font-size:15px; font-weight:700; color:var(--ink); line-height:1.6; }
+  .progress-dots{ display:flex; gap:6px; } .progress-dots span{ width:7px; height:7px; border-radius:50%; background:var(--line); } .progress-dots span.done{ background:var(--gold); } .progress-dots span.cur{ background:var(--teal); }
+
+  .vote-list{ display:flex; flex-direction:column; gap:9px; }
+  .vote-opt{ background:var(--bg-0); border:1px solid var(--line); border-radius:12px; padding:13px 14px; font-weight:700; font-size:15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
+  .vote-opt.sel{ border-color:var(--gold); background:rgba(212,169,79,.14); color:var(--gold-soft); }
+
+  .result-line{ display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px dashed var(--line); font-size:14px;}
+  .result-line:last-child{ border-bottom:none; }
+  .badge{ font-size:11px; padding:3px 9px; border-radius:20px; font-weight:700; }
+  .badge.plus{ background:rgba(46,158,140,.18); color:var(--teal); }
+  .badge.zero{ background:rgba(255,255,255,.06); color:var(--ink-dim); }
+
+  .leader{ display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .leader:last-child{ border-bottom:none; }
+  .leader .rank{ font-family:'Lalezar',cursive; color:var(--gold-soft); font-size:20px; width:26px; text-align:center;}
+  .leader .nm{ flex:1; font-weight:700; }
+  .leader .sc{ font-family:'Lalezar',cursive; color:var(--gold-soft); font-size:20px; }
+
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--panel); border:1px solid var(--gold); color:var(--ink); padding:11px 20px; border-radius:30px; font-size:13.5px; font-weight:700; box-shadow:var(--shadow); z-index:50; opacity:0; pointer-events:none; transition:opacity .3s, bottom .3s; }
+  .toast.show{ opacity:1; bottom:34px; }
+</style>
+</head>
+<body>
+<div class="bg-pattern"></div>
+<div class="app" id="app">
+
+  <!-- ============ HOME / SETUP ============ -->
+  <section class="screen active" id="screen-home">
+    <header class="top"><h1 class="brand">الجاسوس<small>سؤالين، إجابة وحدة تنكشف</small></h1></header>
+    <div class="row" style="max-width:320px;margin:0 auto 12px;gap:8px;">
+      <a class="btn btn-ghost btn-sm" href="./index.html">← الألعاب</a>
+      <button class="btn btn-ghost btn-sm" onclick="showScreen('screen-rules')">📜 القوانين</button>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <h2 class="title" style="margin:0;font-size:17px;">الأعضاء</h2>
+          <button class="btn btn-danger btn-sm" onclick="resetScores()">🗑️ تصفير النقاط</button>
+        </div>
+        <div class="row" style="margin-bottom:10px;">
+          <input type="text" id="playerInput" placeholder="اكتب اسم العضو..." maxlength="16">
+          <button class="btn btn-primary btn-sm" style="flex:0 0 60px;" onclick="addPlayer()">➕</button>
+        </div>
+        <div class="stack" id="playerList" style="gap:8px;"></div>
+        <p class="sub" style="margin:10px 0 0;font-size:12px;" id="playerCountMsg"></p>
+      </div>
+
+      <div class="card">
+        <h2 class="title" style="font-size:17px;margin-bottom:6px;">عدد الجواسيس 🕵️</h2>
+        <div class="stepper">
+          <button onclick="changeSpies(1)">+</button>
+          <div class="num" id="spyNum">1</div>
+          <button onclick="changeSpies(-1)">−</button>
+        </div>
+        <p class="sub" style="font-size:11.5px;margin-top:8px;">يُنصح بجاسوس واحد لكل 4-5 أعضاء</p>
+      </div>
+
+      <button class="btn btn-primary" id="startBtn" onclick="startRound()">🎬 ابدأ الجولة</button>
+    </div>
+    <footer class="hint">المدنيون يشوفون سؤال، والجاسوس يشوف سؤال ثاني مختلف — كل واحد يجاوب سؤاله بصوت عالي، والباقي يحاولون يكتشفون الجاسوس من إجابته</footer>
+  </section>
+
+  <!-- ============ REVEAL (pass device) ============ -->
+  <section class="screen" id="screen-reveal">
+    <header class="top"><h1 class="brand" style="font-size:22px;">كشف الأسئلة</h1></header>
+    <div class="pass-wrap">
+      <div class="turn-label"><div class="to">مرّر الجهاز إلى</div><div class="name" id="revealName">—</div></div>
+      <div class="medallion" id="medallion" onclick="flipMedallion()">
+        <div class="medallion-content" id="medallionContent"><div class="seal">🎭</div><div class="tap">اضغط للكشف بخصوصية</div></div>
+      </div>
+      <div class="progress-dots" id="revealDots"></div>
+      <button class="btn btn-teal" id="revealNextBtn" style="max-width:220px;display:none;" onclick="nextReveal()">تم، التالي ←</button>
+      <button class="btn btn-danger" style="max-width:260px;" onclick="cancelRound()">❌ صار خطأ، ألغِ الجولة</button>
+    </div>
+  </section>
+
+  <!-- ============ ANSWER ORDER OVERVIEW ============ -->
+  <section class="screen" id="screen-answer-order">
+    <header class="top"><h1 class="brand" style="font-size:22px;">ترتيب الإجابة</h1></header>
+    <p class="sub">كل عضو بدوره يجاوب سؤاله (اللي شافه بخصوصية) بصوت عالي أمام الجميع</p>
+    <div class="card"><div id="answerOrderList" class="stack" style="gap:8px;"></div></div>
+    <button class="btn btn-primary" style="margin-top:16px;" onclick="beginAnswerTurns()">ابدأ الإجابات ←</button>
+  </section>
+
+  <!-- ============ ANSWER TURN ============ -->
+  <section class="screen" id="screen-answer-turn">
+    <header class="top"><h1 class="brand" style="font-size:22px;">دور الإجابة</h1></header>
+    <div class="pass-wrap">
+      <div class="turn-label"><div class="to">يجاوب الحين</div><div class="name" id="answerName">—</div></div>
+      <p class="sub" style="max-width:280px;">يجاوب على سؤاله اللي شافه بصوت عالي أمام الجميع، وباقي الأعضاء يستمعون بتركيز</p>
+      <div class="progress-dots" id="answerDots"></div>
+      <button class="btn btn-primary" style="max-width:260px;" onclick="nextAnswerTurn()">التالي ←</button>
+      <button class="btn btn-danger btn-sm" onclick="cancelRound()">❌ إلغاء الجولة</button>
+    </div>
+  </section>
+
+  <!-- ============ VOTING (pass device) ============ -->
+  <section class="screen" id="screen-vote">
+    <header class="top"><h1 class="brand" style="font-size:22px;">التصويت</h1></header>
+    <div class="turn-label" style="margin-bottom:16px;"><div class="to">صوّت الآن يا</div><div class="name" id="voteName">—</div></div>
+    <p class="sub" style="margin-bottom:14px;">اختر بخصوصية مين تعتقد إنه الجاسوس ثم أكّد ومرّر الجهاز</p>
+    <div class="vote-list" id="voteList"></div>
+    <button class="btn btn-primary" style="margin-top:16px;" id="confirmVoteBtn" onclick="confirmVote()" disabled>تأكيد التصويت</button>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section class="screen" id="screen-results">
+    <header class="top"><h1 class="brand" style="font-size:22px;">🎭 الكشف</h1></header>
+    <div class="stack">
+      <div class="card" style="text-align:center;">
+        <div class="sub" style="margin-bottom:6px;">سؤال المدنيين كان</div>
+        <div style="font-family:'Tajawal',sans-serif;font-weight:700;font-size:16px;color:var(--ink);margin-bottom:10px;" id="resQuestionA">—</div>
+        <div class="sub" style="margin-bottom:6px;">وسؤال الجاسوس كان</div>
+        <div style="font-family:'Tajawal',sans-serif;font-weight:700;font-size:16px;color:#ff8a80;" id="resQuestionB">—</div>
+      </div>
+
+      <div class="card">
+        <h2 class="title" style="font-size:16px;margin-bottom:8px;">الجاسوس كان:</h2>
+        <div id="resSpyName" style="font-family:'Lalezar',cursive;font-size:22px;color:#ff8a80;text-align:center;margin-bottom:6px;"></div>
+        <div id="voteTally"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="title" style="font-size:16px;margin-bottom:8px;">النقاط هالجولة</h2>
+        <div id="scoreBreakdown"></div>
+      </div>
+
+      <button class="btn btn-primary" onclick="applyScoresAndContinue()">تطبيق النقاط ومتابعة ←</button>
+    </div>
+  </section>
+
+  <!-- ============ SCOREBOARD ============ -->
+  <section class="screen" id="screen-scoreboard">
+    <header class="top"><h1 class="brand" style="font-size:22px;">🏆 لوحة النقاط</h1></header>
+    <div class="card"><div id="leaderList"></div></div>
+    <div class="stack" style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="startRound()">🔁 جولة جديدة (نفس الأعضاء)</button>
+      <button class="btn btn-ghost" onclick="backToSetup()">⚙️ تعديل الأعضاء</button>
+      <button class="btn btn-danger" onclick="resetScores()">🗑️ تصفير كل النقاط</button>
+    </div>
+  </section>
+
+  <!-- ============ RULES ============ -->
+  <section class="screen" id="screen-rules">
+    <header class="top"><h1 class="brand" style="font-size:22px;">📜 قوانين اللعبة</h1></header>
+    <div class="stack">
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">الفكرة</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2;margin:0;">
+          كل جولة فيها زوج أسئلة متشابهة بالشكل لكن مختلفة بالمعنى. المدنيون يشوفون السؤال الأول، والجاسوس (واحد أو أكثر) يشوف سؤال ثاني مختلف بدون ما يعرف سؤال البقية. كل واحد يجاوب سؤاله بصوت عالي أمام الجميع، والهدف إن المدنيين يكتشفون الجاسوس من اختلاف إجابته، وهدف الجاسوس إنه يتمويه ويجاوب بشكل يناسب الجو العام بدون ما يعرف السؤال الحقيقي.
+        </p>
+      </div>
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">خطوات اللعب</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2.1;margin:0;">
+          1. أضف الأعضاء وحدد عدد الجواسيس<br>
+          2. الجهاز يتمرر بالترتيب — كل عضو يشوف سؤاله بخصوصية (سؤال المدنيين أو سؤال الجاسوس)<br>
+          3. كل عضو بدوره يجاوب سؤاله بصوت عالي أمام الجميع<br>
+          4. نقاش قصير، ثم تصويت سري على مين تعتقدون إنه الجاسوس<br>
+          5. الكشف: يبين مين كان الجاسوس، وأيش كان سؤاله
+        </p>
+      </div>
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">النقاط</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2.1;margin:0;">
+          • كل عضو يصوّت صح (يكتشف الجاسوس) → 100 نقطة<br>
+          • الجاسوس إذا ما اكتشفه أغلب الأعضاء (نجح بالتمويه) → 100 نقطة<br>
+          • الجاسوس إذا انكشف من أغلب الأعضاء → صفر
+        </p>
+      </div>
+      <div class="card">
+        <h2 class="title" style="font-size:16px;">إذا صار خطأ</h2>
+        <p class="sub" style="text-align:right;font-size:13.5px;line-height:2;margin:0;">
+          إذا عضو شاف سؤال عضو ثاني بالغلط وقت التمرير، فيه زر "❌ إلغاء الجولة" — يرجعك للبداية بدون ما يمسح الأعضاء أو النقاط.
+        </p>
+      </div>
+      <button class="btn btn-primary" onclick="showScreen('screen-home')">رجوع ←</button>
+    </div>
+  </section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== QUESTION PAIRS ===================== */
+/* كل زوج: A = سؤال المدنيين، B = سؤال الجاسوس (مختلف بالمعنى لكن قريب بالجو العام) */
+const QUESTION_PAIRS = [
+  {a:"شنو أكثر شي تحب تسويه بوقت فراغك؟", b:"شنو أكثر شي تكرهه تسويه بوقت فراغك؟"},
+  {a:"وش أحلى ذكرى ليك من الطفولة؟", b:"وش أغرب موقف صار لك؟"},
+  {a:"لو تقدر تسافر أي مكان الحين، وين بتروح؟", b:"لو ما تقدر تسافر أبد، وين بتتمنى تروح؟"},
+  {a:"شنو أكلتك المفضلة؟", b:"شنو أكلة ما تقدر تاكلها أبد؟"},
+  {a:"مين أكثر شخص أثر فيك بحياتك؟", b:"مين أكثر شخص ضايقك بحياتك؟"},
+  {a:"وش أكثر شي تفتخر فيه بنفسك؟", b:"وش أكثر شي تندم عليه؟"},
+  {a:"لو تربح مليون ريال وش أول شي تسويه؟", b:"لو تخسر كل فلوسك وش أول شي تسويه؟"},
+  {a:"وش هوايتك المفضلة؟", b:"وش هواية ودك تجربها بس ما جربتها؟"},
+  {a:"وش أفضل فيلم شفته؟", b:"وش أسوأ فيلم شفته؟"},
+  {a:"شنو الشي اللي يخوّفك؟", b:"شنو الشي اللي يضحّكك بسرعة؟"},
+  {a:"وين تحب تقضي إجازتك؟", b:"وين ما تحب تقضي إجازتك أبد؟"},
+  {a:"مين تشبه من عائلتك بالشخصية؟", b:"مين ما تشبهه إطلاقًا من عائلتك؟"},
+  {a:"وش أكثر شي يضايقك بالناس؟", b:"وش أكثر شي يعجبك بالناس؟"},
+  {a:"لو تقدر تغيّر شي وحد بحياتك، وش بيكون؟", b:"وش شي بحياتك ما بتغيّره أبد؟"},
+  {a:"وش أفضل هدية استلمتها؟", b:"وش أسوأ هدية استلمتها؟"},
+  {a:"شنو أكثر مكان تحس بالراحة فيه؟", b:"شنو أكثر مكان تحس بالتوتر فيه؟"},
+  {a:"وش حلمك اللي تسعى له؟", b:"وش خوفك اللي يقلقك؟"},
+  {a:"مين أفضل صديق عندك وليه؟", b:"مين صديق سابق ما عاد تتواصل معه وليه؟"},
+  {a:"وش أكثر تطبيق تستخدمه يوميًا؟", b:"وش تطبيق حذفته وندمت عليه؟"},
+  {a:"شنو أول شي تسويه لما تصحى الصبح؟", b:"شنو آخر شي تسويه قبل تنام؟"},
+  {a:"وش أكثر شي يضيّع وقتك؟", b:"وش أكثر شي يوفّر عليك وقتك؟"},
+  {a:"لو تقدر تتعلم مهارة جديدة بثانية وحدة، وش تختار؟", b:"وش مهارة حاولت تتعلمها وفشلت؟"},
+  {a:"وش رأيك بالقهوة العربية؟", b:"وش رأيك بالشاي؟"},
+  {a:"مين الشخصية المشهورة اللي تتمنى تقابلها؟", b:"مين الشخصية المشهورة اللي ما تحب تقابلها؟"}
+];
+
+/* ===================== STATE ===================== */
+let state = { players: [], numSpies: 1, lastSpyIdx: [] };
+const STORAGE_KEY = 'spy_game_v1';
+let round = null;
+
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify({players: state.players, numSpies: state.numSpies, lastSpyIdx: state.lastSpyIdx})); }
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){ const d = JSON.parse(raw); if(d.players) state.players = d.players; if(d.numSpies) state.numSpies = d.numSpies; if(d.lastSpyIdx) state.lastSpyIdx = d.lastSpyIdx; }
+  }catch(e){}
+}
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1700); }
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ===================== SETUP ===================== */
+function renderPlayers(){
+  const list = document.getElementById('playerList'); list.innerHTML='';
+  state.players.forEach((p,i)=>{
+    const div = document.createElement('div'); div.className='player-chip';
+    div.innerHTML = `<span>${p.name}</span><span style="display:flex;align-items:center;gap:10px;"><span class="score">${p.score} نقطة</span><button class="chip-x" onclick="removePlayer(${i})">✕</button></span>`;
+    list.appendChild(div);
+  });
+  const msg = document.getElementById('playerCountMsg');
+  msg.textContent = state.players.length < 3 ? `أضف ${3-state.players.length} أعضاء على الأقل` : `عدد الأعضاء: ${state.players.length}`;
+  document.getElementById('startBtn').disabled = state.players.length < 3;
+  document.getElementById('spyNum').textContent = state.numSpies;
+}
+function addPlayer(){
+  const input = document.getElementById('playerInput');
+  const name = input.value.trim();
+  if(!name) return;
+  if(state.players.some(p=>p.name===name)){ showToast('الاسم موجود مسبقًا'); return; }
+  state.players.push({name, score:0});
+  input.value=''; saveState(); renderPlayers();
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('playerInput').addEventListener('keydown', e=>{ if(e.key==='Enter') addPlayer(); });
+});
+function removePlayer(i){ state.players.splice(i,1); saveState(); renderPlayers(); }
+function changeSpies(delta){
+  const max = Math.max(1, Math.floor(state.players.length/3));
+  state.numSpies = Math.min(max, Math.max(1, state.numSpies + delta));
+  saveState(); renderPlayers();
+}
+function backToSetup(){ renderPlayers(); showScreen('screen-home'); }
+function resetScores(){
+  if(!confirm('متأكد تبي تصفر كل النقاط؟')) return;
+  state.players.forEach(p=>p.score=0); saveState(); renderPlayers(); showToast('تم تصفير النقاط');
+}
+
+/* ===================== START ROUND ===================== */
+function startRound(){
+  if(state.players.length < 3){ showToast('أضف 3 أعضاء على الأقل'); return; }
+  const pair = QUESTION_PAIRS[Math.floor(Math.random()*QUESTION_PAIRS.length)];
+  const order = state.players.map((p,i)=>i); // reveal order = join order
+
+  let pool = order;
+  if(state.lastSpyIdx && state.lastSpyIdx.length && order.length > state.numSpies + state.lastSpyIdx.length - 1){
+    const filtered = order.filter(i => !state.lastSpyIdx.includes(i));
+    if(filtered.length >= state.numSpies) pool = filtered;
+  }
+  const spyIdx = shuffle(pool).slice(0, state.numSpies);
+  state.lastSpyIdx = spyIdx;
+  saveState();
+
+  round = {
+    order, pair, spyIdx,
+    revealPos: 0,
+    answerOrder: shuffle(state.players.map((p,i)=>i)),
+    answerPos: 0,
+    voteOrder: shuffle(state.players.map((p,i)=>i)),
+    votePos: 0,
+    votes: {},
+    currentVoteSelection: null
+  };
+  showScreen('screen-reveal');
+  renderRevealDots();
+  setupRevealFor(order[0]);
+}
+function cancelRound(){
+  if(!confirm('تبي تلغي الجولة وترجع للبداية؟ الأعضاء والنقاط ما بتتأثر.')) return;
+  round = null;
+  showToast('تم إلغاء الجولة');
+  backToSetup();
+}
+
+/* ===================== REVEAL ===================== */
+function renderRevealDots(){
+  const wrap = document.getElementById('revealDots'); wrap.innerHTML='';
+  round.order.forEach((_,i)=>{ const dot=document.createElement('span'); dot.className = i<round.revealPos?'done':(i===round.revealPos?'cur':''); wrap.appendChild(dot); });
+}
+let medallionRevealed = false;
+function setupRevealFor(playerIdx){
+  document.getElementById('revealName').textContent = state.players[playerIdx].name;
+  document.getElementById('revealNextBtn').style.display = 'none';
+  medallionRevealed = false;
+  const content = document.getElementById('medallionContent');
+  content.style.transform = 'scaleX(1)';
+  content.className = 'medallion-content';
+  content.innerHTML = `<div class="seal">🎭</div><div class="tap">اضغط للكشف بخصوصية</div>`;
+}
+function flipMedallion(){
+  if(medallionRevealed) return;
+  medallionRevealed = true;
+  const content = document.getElementById('medallionContent');
+  const playerIdx = round.order[round.revealPos];
+  const isSpy = round.spyIdx.includes(playerIdx);
+  content.style.transform = 'scaleX(0)';
+  setTimeout(()=>{
+    if(isSpy){
+      content.className = 'medallion-content spy';
+      content.innerHTML = `<div class="role">🕵️ أنت الجاسوس!</div><div class="question">${round.pair.b}</div>`;
+    } else {
+      content.className = 'medallion-content citizen';
+      content.innerHTML = `<div class="role">👤 أنت مدني</div><div class="question">${round.pair.a}</div>`;
+    }
+    content.style.transform = 'scaleX(1)';
+    document.getElementById('revealNextBtn').style.display = 'block';
+  }, 180);
+}
+function nextReveal(){
+  round.revealPos++;
+  renderRevealDots();
+  if(round.revealPos >= round.order.length){ showAnswerOrderOverview(); }
+  else { setupRevealFor(round.order[round.revealPos]); }
+}
+
+/* ===================== ANSWER PHASE ===================== */
+function showAnswerOrderOverview(){
+  showScreen('screen-answer-order');
+  const list = document.getElementById('answerOrderList'); list.innerHTML='';
+  round.answerOrder.forEach((idx,pos)=>{
+    const row = document.createElement('div'); row.className='player-chip';
+    row.innerHTML = `<span>${pos+1}. ${state.players[idx].name}</span><span style="color:var(--ink-dim);font-size:12px;">يجاوب بصوت عالي</span>`;
+    list.appendChild(row);
+  });
+}
+function beginAnswerTurns(){
+  showScreen('screen-answer-turn');
+  setupAnswerTurn();
+}
+function setupAnswerTurn(){
+  const idx = round.answerOrder[round.answerPos];
+  document.getElementById('answerName').textContent = state.players[idx].name;
+  const wrap = document.getElementById('answerDots'); wrap.innerHTML='';
+  round.answerOrder.forEach((_,i)=>{ const dot=document.createElement('span'); dot.className = i<round.answerPos?'done':(i===round.answerPos?'cur':''); wrap.appendChild(dot); });
+}
+function nextAnswerTurn(){
+  round.answerPos++;
+  if(round.answerPos >= round.answerOrder.length){ goToVote(); }
+  else { setupAnswerTurn(); }
+}
+
+/* ===================== VOTE ===================== */
+function goToVote(){
+  showScreen('screen-vote');
+  setupVoteTurn();
+}
+function setupVoteTurn(){
+  const voterIdx = round.voteOrder[round.votePos];
+  document.getElementById('voteName').textContent = state.players[voterIdx].name;
+  round.currentVoteSelection = null;
+  document.getElementById('confirmVoteBtn').disabled = true;
+  const list = document.getElementById('voteList'); list.innerHTML='';
+  state.players.forEach((p,i)=>{
+    if(i===voterIdx) return;
+    const div = document.createElement('div'); div.className='vote-opt';
+    div.innerHTML = `<span>${p.name}</span><span>🕵️</span>`;
+    div.onclick = ()=>{ round.currentVoteSelection = i; document.querySelectorAll('#voteList .vote-opt').forEach(el=>el.classList.remove('sel')); div.classList.add('sel'); document.getElementById('confirmVoteBtn').disabled=false; };
+    list.appendChild(div);
+  });
+}
+function confirmVote(){
+  const voterIdx = round.voteOrder[round.votePos];
+  round.votes[voterIdx] = round.currentVoteSelection;
+  round.votePos++;
+  if(round.votePos >= round.voteOrder.length){ showResults(); } else { setupVoteTurn(); }
+}
+
+/* ===================== RESULTS & SCORING ===================== */
+let pendingScoreDelta = {};
+function showResults(){
+  document.getElementById('resQuestionA').textContent = round.pair.a;
+  document.getElementById('resQuestionB').textContent = round.pair.b;
+  document.getElementById('resSpyName').textContent = round.spyIdx.map(i=>state.players[i].name).join('، ');
+
+  const tally = {};
+  state.players.forEach((p,i)=> tally[i]=0);
+  Object.values(round.votes).forEach(v=>{ if(v!==null && v!==undefined) tally[v]++; });
+  const tallyDiv = document.getElementById('voteTally'); tallyDiv.innerHTML='';
+  state.players.forEach((p,i)=>{
+    const line = document.createElement('div'); line.className='result-line';
+    const isSpy = round.spyIdx.includes(i);
+    line.innerHTML = `<span>${p.name} ${isSpy?'🕵️':''}</span><span>${tally[i]} صوت</span>`;
+    tallyDiv.appendChild(line);
+  });
+
+  pendingScoreDelta = {};
+  state.players.forEach(p=> pendingScoreDelta[p.name]=0);
+
+  Object.keys(round.votes).forEach(voterIdxStr=>{
+    const voterIdx = parseInt(voterIdxStr);
+    const votedFor = round.votes[voterIdx];
+    const correct = round.spyIdx.includes(votedFor);
+    if(correct) pendingScoreDelta[state.players[voterIdx].name] += 100;
+  });
+
+  const totalVoters = Object.keys(round.votes).length;
+  let caughtCount = 0;
+  Object.values(round.votes).forEach(v=>{ if(round.spyIdx.includes(v)) caughtCount++; });
+  const caught = totalVoters > 0 && caughtCount > totalVoters/2;
+  if(!caught){
+    round.spyIdx.forEach(idx=>{ pendingScoreDelta[state.players[idx].name] += 100; });
+  }
+
+  const breakdownDiv = document.getElementById('scoreBreakdown'); breakdownDiv.innerHTML='';
+  state.players.forEach(p=>{
+    const delta = pendingScoreDelta[p.name] || 0;
+    const line = document.createElement('div'); line.className='result-line';
+    line.innerHTML = `<span>${p.name}</span><span class="badge ${delta>0?'plus':'zero'}">${delta>0?'+'+delta:'0'}</span>`;
+    breakdownDiv.appendChild(line);
+  });
+
+  showScreen('screen-results');
+}
+function applyScoresAndContinue(){
+  state.players.forEach(p=>{ p.score += (pendingScoreDelta[p.name]||0); });
+  saveState();
+  renderLeaderboard();
+  showScreen('screen-scoreboard');
+  if(window.SalfaAds) window.SalfaAds.maybeShowInterstitial();
+}
+
+/* ===================== SCOREBOARD ===================== */
+function renderLeaderboard(){
+  const sorted = [...state.players].sort((a,b)=>b.score-a.score);
+  const div = document.getElementById('leaderList'); div.innerHTML='';
+  sorted.forEach((p,i)=>{
+    const line = document.createElement('div'); line.className='leader';
+    const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    line.innerHTML = `<span class="rank">${medal}</span><span class="nm">${p.name}</span><span class="sc">${p.score}</span>`;
+    div.appendChild(line);
+  });
+}
+
+/* ===================== INIT ===================== */
+loadState();
+renderPlayers();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
