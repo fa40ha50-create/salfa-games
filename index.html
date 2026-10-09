@@ -426,7 +426,7 @@
   <section class="screen" id="screen-results">
     <header class="top"><h1 class="brand" style="font-size:22px;">🎭 الكشف</h1></header>
     <div class="stack">
-      <div class="card" style="text-align:center;">
+      <div class="card" id="wordRevealCard" style="text-align:center;display:none;">
         <div class="sub" style="margin-bottom:6px;">السالفة كانت</div>
         <div style="font-family:'Lalezar',cursive;font-size:26px;color:var(--gold-soft);" id="resWord">—</div>
         <div class="sub" style="margin-top:4px;" id="resCat">—</div>
@@ -894,6 +894,8 @@ function showResults(){
   const r = state.round;
   document.getElementById('resWord').textContent = r.word;
   document.getElementById('resCat').textContent = r.category;
+  // keep the actual word hidden until برا السالفة finishes the guess — showing it earlier would spoil the guessing mini-game
+  document.getElementById('wordRevealCard').style.display = 'none';
 
   const impostorNames = r.impostorIdx.map(i=>state.players[i].name).join('، ');
   document.getElementById('resImpostorName').textContent = impostorNames;
@@ -988,6 +990,7 @@ function renderGuessGrid(){
         showToast('غلط، ما فيه نقطة هالمرة');
       }
       guessResolved = true;
+      document.getElementById('wordRevealCard').style.display = 'block';
       document.getElementById('applyScoresBtn').disabled = false;
       renderScoreBreakdown(null, true);
     };
