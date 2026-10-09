@@ -1,9 +1,10 @@
-const CACHE_NAME = 'salfa-games-v2';
+const CACHE_NAME = 'salfa-games-v5';
 const ASSETS = [
   './index.html',
   './قول-بس-لا-تقول.html',
   './المافيا.html',
   './كود-نيمز.html',
+  './الجاسوس.html',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png'
