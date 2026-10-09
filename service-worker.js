@@ -1,4 +1,4 @@
-const CACHE_NAME = 'salfa-games-v5';
+const CACHE_NAME = 'salfa-games-v6';
 const ASSETS = [
   './index.html',
   './قول-بس-لا-تقول.html',
